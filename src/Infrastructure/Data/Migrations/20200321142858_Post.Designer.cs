@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Nnn.Infrastructure.Data;
 
 namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(NnnContext))]
-    partial class NnnContextModelSnapshot : ModelSnapshot
+    [Migration("20200321142858_Post")]
+    partial class Post
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,37 +48,6 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.HasIndex("ParentCategoryId");
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Comments.Comment", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Content");
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("CreatorUserId");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<string>("ModifiedBy");
-
-                    b.Property<DateTime>("ModifiedDate");
-
-                    b.Property<long>("PostId");
-
-                    b.Property<long>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Notifications.Notification", b =>
@@ -138,7 +109,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<string>("Title");
 
-                    b.Property<long>("UserId");
+                    b.Property<int>("UserId");
+
+                    b.Property<long?>("UserId1");
 
                     b.Property<string>("Where");
 
@@ -146,40 +119,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId1");
 
-                    b.ToTable("Posts");
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Replies.Reply", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("CommentId");
-
-                    b.Property<string>("Content");
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("CreatorUserId");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<string>("ModifiedBy");
-
-                    b.Property<DateTime>("ModifiedDate");
-
-                    b.Property<long>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CommentId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Reply");
+                    b.ToTable("Post");
                 });
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Users.User", b =>
@@ -204,10 +146,12 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
+                    b.Property<string>("Name");
+
                     b.Property<string>("Password")
                         .IsRequired();
 
-                    b.Property<string>("ProfileImagePath");
+                    b.Property<string>("Surname");
 
                     b.Property<string>("Username")
                         .IsRequired();
@@ -224,38 +168,11 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .HasForeignKey("ParentCategoryId");
                 });
 
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Comments.Comment", b =>
-                {
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
-                        .WithMany("Comments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", b =>
                 {
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
                         .WithMany("Posts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Replies.Reply", b =>
-                {
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Comments.Comment", "Comment")
-                        .WithMany("Replies")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserId1");
                 });
 #pragma warning restore 612, 618
         }

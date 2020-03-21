@@ -25,6 +25,9 @@ using Microsoft.Nnn.ApplicationCore.Entities.EmailSettings;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
+using Microsoft.Nnn.ApplicationCore.Services.CommentService;
+using Microsoft.Nnn.ApplicationCore.Services.PostService;
+using Microsoft.Nnn.ApplicationCore.Services.ReplyService;
 using Microsoft.Nnn.ApplicationCore.Services.UserService;
 using Microsoft.Nnn.Infrastructure.Data;
 using Microsoft.Nnn.Infrastructure.Logging;
@@ -76,6 +79,9 @@ namespace Microsoft.Nnn.Web
 
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
+            services.AddScoped<IPostAppService, PostAppService>();
+            services.AddScoped<ICommentAppService, CommentAppService>();
+            services.AddScoped<IReplyAppService, ReplyAppService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IBlobService, BlobService>();
             services.Configure<CatalogSettings>(Configuration);

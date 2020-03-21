@@ -26,7 +26,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpPost]
-        public async Task<IActionResult> CreateUser(CreateUserDto input)
+        public async Task<IActionResult> CreateUser([FromForm]  CreateUserDto input)
         {
            var user = await _userService.CreateUser(input);
            return Ok(user);

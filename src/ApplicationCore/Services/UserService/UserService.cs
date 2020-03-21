@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
+using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.PasswordHasher;
 using Nnn.ApplicationCore.Services.UserService.Dto;
 
@@ -11,22 +12,27 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
     public class UserService:IUserService
     {
         private readonly IAsyncRepository<User> _userRepository;
+        private readonly IBlobService _blobService;
 
-        public UserService(IAsyncRepository<User> userRepository)
+        public UserService(IAsyncRepository<User> userRepository,IBlobService blobService)
         {
             _userRepository = userRepository;
+            _blobService = blobService;
         }
         
         public async Task<User> CreateUser(CreateUserDto input)
         {
             var user = new User
             {
-                Name = input.Name,
-                Surname = input.Surname,
+                Username = input.Username,
                 EmailAddress = input.EmailAddress,
                 Gender = input.Gender,
-                Username = input.Username
             };
+            if (input.ProfileImage!=null)
+            {
+                var imgPath = await _blobService.InsertFile(input.ProfileImage);
+                user.ProfileImagePath = imgPath;
+            }
             var hashedPassword = SecurePasswordHasherHelper.Hash(input.Password);
             user.Password = hashedPassword;
             await _userRepository.AddAsync(user);
@@ -43,11 +49,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
         {
             var user = await _userRepository.GetByIdAsync(input.Id);
             user.Gender = input.Gender;
-            user.Name = input.Name;
-            user.Surname = input.Surname;
             user.EmailAddress = input.EmailAddress;
             user.Username = input.Username;
-            
+
+            if (input.ProfileImage != null)
+            {
+                var imgPath = await _blobService.InsertFile(input.ProfileImage);
+                user.ProfileImagePath = imgPath;
+            }
             await _userRepository.UpdateAsync(user);
         }
 
