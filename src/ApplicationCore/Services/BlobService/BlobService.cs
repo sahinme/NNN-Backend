@@ -20,7 +20,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.BlobService
         }
         public async Task<string> InsertFile(IFormFile asset)
         {
-            string containerUrl = "edutrocontainer";
+            string containerUrl = "nnncontainer";
             string url =
                 "DefaultEndpointsProtocol=https;AccountName=edutrostorageaccount;AccountKey=i+39A6nr6OdF54X7z2CIlZvn9aN8j2Bi6Eo7g9HPH1zYj1wdgYKNC1n/QUPNke+ucnomaxsxd7pSFkN0JgdoXw==;EndpointSuffix=core.windows.net";
             try

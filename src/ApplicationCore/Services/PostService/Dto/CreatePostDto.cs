@@ -7,5 +7,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public string How { get; set; }
         public string Where { get; set; }
         public long UserId { get; set; }
+        public long[] CategoryIds { get; set; }
+        public string[] Tags { get; set; }
     }
 }

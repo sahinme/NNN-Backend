@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Nnn.Infrastructure.Data;
 
 namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(NnnContext))]
-    partial class NnnContextModelSnapshot : ModelSnapshot
+    [Migration("20200322155812_likes-unlikes")]
+    partial class likesunlikes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,6 +31,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<string>("CreatorUserId");
 
+                    b.Property<string>("Description");
+
                     b.Property<string>("DisplayName");
 
                     b.Property<bool>("IsDeleted");
@@ -37,7 +41,11 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
+                    b.Property<long?>("ParentCategoryId");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ParentCategoryId");
 
                     b.ToTable("Categories");
                 });
@@ -139,88 +147,6 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostCategories.PostCategory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("CategoryId");
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("CreatorUserId");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<string>("ModifiedBy");
-
-                    b.Property<DateTime>("ModifiedDate");
-
-                    b.Property<long>("PostId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("PostId");
-
-                    b.ToTable("PostCategories");
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostTags.PostTag", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("CreatorUserId");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<string>("ModifiedBy");
-
-                    b.Property<DateTime>("ModifiedDate");
-
-                    b.Property<long>("PostId");
-
-                    b.Property<long>("TagId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("PostTags");
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostTags.Tag", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("CreatorUserId");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<string>("ModifiedBy");
-
-                    b.Property<DateTime>("ModifiedDate");
-
-                    b.Property<string>("Text")
-                        .HasMaxLength(32);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", b =>
@@ -351,6 +277,13 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Categories.Category", b =>
+                {
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Categories.Category", "ParentCategory")
+                        .WithMany()
+                        .HasForeignKey("ParentCategoryId");
+                });
+
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Comments.Comment", b =>
                 {
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
@@ -374,32 +307,6 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostCategories.PostCategory", b =>
-                {
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Categories.Category", "Category")
-                        .WithMany("Posts")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
-                        .WithMany("Categories")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostTags.PostTag", b =>
-                {
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
-                        .WithMany("Tags")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.PostTags.Tag", "Tag")
-                        .WithMany("Posts")
-                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

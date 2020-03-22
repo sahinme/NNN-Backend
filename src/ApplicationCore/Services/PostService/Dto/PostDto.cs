@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.Dto;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
 {
@@ -11,6 +14,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public string Where { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public PostUserDto UserInfo { get; set; }
+        public List<CategoryDto> Categories { get; set; }
+        public List<TagDto> Tags { get; set; }
     }
 
     public class PostUserDto

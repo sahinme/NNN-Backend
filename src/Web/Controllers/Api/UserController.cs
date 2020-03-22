@@ -20,9 +20,10 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
 
         [HttpGet("by-id")]
-        public async Task<User> GetUser(int id)
+        public async Task<IActionResult> GetUser(int id)
         {
-            return await _userService.GetUserById(id);
+            var result = await _userService.GetUserById(id);
+            return Ok(result);
         }
         
         [HttpPost]

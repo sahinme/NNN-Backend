@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
@@ -39,9 +40,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             return user;
         }
 
-        public async Task<User> GetUserById(int id)
+        public async Task<UserDto> GetUserById(int id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
+            var user = await _userRepository.GetAll().Where(x => x.Id == id).Select(x => new UserDto
+            {
+                Id = x.Id,
+                Username = x.Username,
+                ProfileImagePath = BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
+            }).FirstOrDefaultAsync();
             return user;
         }
 
