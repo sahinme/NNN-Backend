@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.Nnn.ApplicationCore.Entities.Comments;
+using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.Likes;
 using Microsoft.Nnn.ApplicationCore.Entities.PostCategories;
 using Microsoft.Nnn.ApplicationCore.Entities.PostTags;
@@ -16,6 +17,8 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Posts
         public string How { get; set; }
         public string Where { get; set; }
         public long UserId { get; set; }
+        public long CommunityId { get; set; }
+        public Community Community { get; set; } 
         public User User { get; set; }
         
         public virtual ICollection<Comment> Comments { get; set; }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Categories;
 using Microsoft.Nnn.ApplicationCore.Entities.Comments;
+using Microsoft.Nnn.ApplicationCore.Entities.Communities;
+using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.Likes;
 using Microsoft.Nnn.ApplicationCore.Entities.Notifications;
 using Microsoft.Nnn.ApplicationCore.Entities.PostCategories;
@@ -11,7 +13,7 @@ using Microsoft.Nnn.ApplicationCore.Entities.Users;
 
 namespace Microsoft.Nnn.Infrastructure.Data
 {
-    //dotnet ef migrations add post_categories --context NnnContext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
+    //dotnet ef migrations add community --context NnnContext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
     public class NnnContext : DbContext
     {
         public NnnContext(DbContextOptions<NnnContext> options) : base(options)
@@ -27,6 +29,8 @@ namespace Microsoft.Nnn.Infrastructure.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<PostTag> PostTags { get; set; }
         public DbSet<PostCategory> PostCategories { get; set; }
+        public DbSet<Community> Communities { get; set; }
+        public DbSet<CommunityUser> CommunityUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -39,6 +43,13 @@ namespace Microsoft.Nnn.Infrastructure.Data
                 .HasOne<Post>(sc => sc.Post)
                 .WithMany(s => s.Categories)
                 .HasForeignKey(sc => sc.PostId);
+            
+            builder.Entity<CommunityUser>()
+                .HasOne<Community>(sc => sc.Community)
+                .WithMany(s => s.Users)
+                .HasForeignKey(sc => sc.CommunityId);
+            
+          
         }
         
     }

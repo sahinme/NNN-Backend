@@ -26,6 +26,7 @@ using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CommentService;
+using Microsoft.Nnn.ApplicationCore.Services.CommunityService;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService;
 using Microsoft.Nnn.ApplicationCore.Services.UserService;
@@ -83,6 +84,7 @@ namespace Microsoft.Nnn.Web
             services.AddScoped<ICommentAppService, CommentAppService>();
             services.AddScoped<IReplyAppService, ReplyAppService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICommunityAppService, CommunityAppService>();
             services.AddScoped<IBlobService, BlobService>();
             services.Configure<CatalogSettings>(Configuration);
             services.AddSingleton<IUriComposer>(new UriComposer(Configuration.Get<CatalogSettings>()));
