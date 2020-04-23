@@ -11,9 +11,6 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers
         public long CommunityId { get; set; }
         
         [DefaultValue(false)]
-        public bool IsAccepted { get; set; }
-        
-        [DefaultValue(false)]
         public bool Suspended { get; set; }
         
         public User User { get; set; }

@@ -13,7 +13,7 @@ using Microsoft.Nnn.ApplicationCore.Entities.Users;
 
 namespace Microsoft.Nnn.Infrastructure.Data
 {
-    //dotnet ef migrations add community --context NnnContext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
+    //dotnet ef migrations add community2 --context NnnContext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
     public class NnnContext : DbContext
     {
         public NnnContext(DbContextOptions<NnnContext> options) : base(options)

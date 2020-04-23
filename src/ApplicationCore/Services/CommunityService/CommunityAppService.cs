@@ -49,7 +49,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     Id = x.Id,
                     Name = x.Name,
                     Description = x.Description,
-                    Members = x.Users.Select(m => new CommunityUserDto
+                    Members = x.Users.Where(m=>m.IsDeleted==false).Select(m => new CommunityUserDto
                     {
                         Id = m.User.Id,
                         Username = m.User.Username,

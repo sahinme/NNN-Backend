@@ -29,8 +29,33 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromForm]  CreateUserDto input)
         {
-           var user = await _userService.CreateUser(input);
-           return Ok(user);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var user = await _userService.CreateUser(input);
+            return Ok(user);
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> JoinCommunity(long userId,long communityId)
+        {
+            var result = await _userService.JoinCommunity(userId, communityId);
+            return Ok(result);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetUserCommunities(long userId)
+        {
+            var result = await _userService.GetUserCommunities(userId);
+            return Ok(result);
+        }
+        
+        [HttpDelete]
+        public async Task<IActionResult> LeaveFromCommunity(long userId,long communityId)
+        {
+            await _userService.LeaveFromCommunity(userId, communityId);
+            return Ok();
         }
 
         [HttpPut]

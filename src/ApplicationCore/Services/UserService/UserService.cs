@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
+using Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PasswordHasher;
 using Nnn.ApplicationCore.Services.UserService.Dto;
 
@@ -13,12 +16,17 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
     public class UserService:IUserService
     {
         private readonly IAsyncRepository<User> _userRepository;
+        private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
         private readonly IBlobService _blobService;
 
-        public UserService(IAsyncRepository<User> userRepository,IBlobService blobService)
+        public UserService(
+            IAsyncRepository<User> userRepository,IBlobService blobService,
+            IAsyncRepository<CommunityUser> communityUserRepository
+            )
         {
             _userRepository = userRepository;
             _blobService = blobService;
+            _communityUserRepository = communityUserRepository;
         }
         
         public async Task<User> CreateUser(CreateUserDto input)
@@ -89,5 +97,42 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             user.IsDeleted = true;
             await _userRepository.UpdateAsync(user);
         }
+
+        public async Task<CommunityUser> JoinCommunity(long userId, long communityId)
+        {
+            var model = new CommunityUser
+            {
+                UserId = userId,
+                CommunityId = communityId
+            };
+            await _communityUserRepository.AddAsync(model);
+            return model;
+        }
+        
+        public async Task LeaveFromCommunity(long userId, long communityId)
+        {
+            var isExist = await _communityUserRepository.GetAll()
+                .Where(x => x.CommunityId == communityId && x.UserId == userId && x.IsDeleted == false )
+                .FirstOrDefaultAsync();
+            if (isExist == null) throw new Exception("this relation don`t exist");
+            isExist.IsDeleted = true;
+            await _communityUserRepository.UpdateAsync(isExist);
+        }
+        
+        public async Task<List<GetAllCommunityDto>> GetUserCommunities(long userId)
+        {
+            var result = await _communityUserRepository.GetAll()
+                .Where(x => x.UserId == userId && x.IsDeleted == false && x.Suspended == false)
+                .Include(x => x.Community).Select(x => new GetAllCommunityDto
+                {
+                    Id = x.Community.Id,
+                    Name = x.Community.Name,
+                    Description = x.Community.Description,
+                    MemberCount = x.Community.Users.Count
+                }).ToListAsync();
+            return result;
+        }
+        
+        
     }
 }

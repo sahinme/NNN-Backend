@@ -16,7 +16,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Users
         [Required]
         [MinLength(6)]
         public string Password { get; set; }
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "Invalid Email Address")]
         public string EmailAddress { get; set; }
         
         public virtual ICollection<Post> Posts { get; set; }

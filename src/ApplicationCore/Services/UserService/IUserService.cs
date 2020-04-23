@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
+using Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto;
 using Nnn.ApplicationCore.Services.UserService.Dto;
 
 namespace Microsoft.Nnn.ApplicationCore.Interfaces
@@ -11,5 +14,9 @@ namespace Microsoft.Nnn.ApplicationCore.Interfaces
         Task UpdateUser(UpdateUserDto input);
         Task<bool> Login(LoginDto input);
         Task DeleteUser(long id);
+        Task<CommunityUser> JoinCommunity(long userId,long communityId);
+        Task LeaveFromCommunity(long userId,long communityId);
+        Task<List<GetAllCommunityDto>> GetUserCommunities(long userId);
+        
     }
 }
