@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.Dto;
 
@@ -8,14 +9,13 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
     public class PostDto
     {
         public long Id { get; set; }
-        public string Title { get; set; }
-        public string Why { get; set; }
-        public string How { get; set; }
-        public string Where { get; set; }
+        public string Content { get; set; }
+        public string ContentPath { get; set; }
+        public ContentType ContentType { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public PostUserDto UserInfo { get; set; }
-        public List<CategoryDto> Categories { get; set; }
         public List<TagDto> Tags { get; set; }
+        public long LikeCount { get; set; }
     }
 
     public class PostUserDto

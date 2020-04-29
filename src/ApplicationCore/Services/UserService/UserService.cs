@@ -36,6 +36,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 Username = input.Username,
                 EmailAddress = input.EmailAddress,
                 Gender = input.Gender,
+                Bio = input.Bio,
+                VerificationCode = RandomString.GenerateString(35)
             };
             if (input.ProfileImage!=null)
             {
@@ -54,18 +56,51 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             {
                 Id = x.Id,
                 Username = x.Username,
+                EmailAddress = x.EmailAddress,
+                Bio = x.Bio,
+                Gender = x.Gender,
                 ProfileImagePath = BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
             }).FirstOrDefaultAsync();
             return user;
+        }
+        
+        public async Task<UserDto> GetByUsername(string username)
+        {
+            var user = await _userRepository.GetAll().Where(x => x.Username == username).Select(x => new UserDto
+            {
+                Id = x.Id,
+                Username = x.Username,
+                Bio = x.Bio,
+                EmailAddress = x.EmailAddress,
+                Gender = x.Gender,
+                ProfileImagePath = BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
+            }).FirstOrDefaultAsync();
+            return user;    
+        }
+
+        public async Task<bool> VerifyEmail(string verificationCode)
+        {
+            var user = await _userRepository.GetAll().Where(x => x.VerificationCode == verificationCode)
+                .FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return false;
+            }
+            user.EmailVerified = true;
+            await _userRepository.UpdateAsync(user);
+            return true;
         }
 
         public async Task UpdateUser(UpdateUserDto input)
         {
             var user = await _userRepository.GetByIdAsync(input.Id);
+            
+            if (input.Username != null) user.Username = input.Username;
+            if (input.EmailAddress != null) user.EmailAddress = input.EmailAddress;
+            if (input.Bio != null) user.Bio = input.Bio;
+            if (input.Username != null) user.Username = input.Username;
             user.Gender = input.Gender;
-            user.EmailAddress = input.EmailAddress;
-            user.Username = input.Username;
-
+            
             if (input.ProfileImage != null)
             {
                 var imgPath = await _blobService.InsertFile(input.ProfileImage);
@@ -80,15 +115,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 .FirstOrDefaultAsync(x => x.Username == input.Username);
             if (user == null)
             {
-                throw new Exception("There is no user!");
+                throw new Exception("Böyle bir kullanıcı bulunamadı!");
             }
             var decodedPassword = SecurePasswordHasherHelper.Verify(input.Password, user.Password);
-            if (!decodedPassword)
-            {
-                return false;
-            }
-
-            return true;
+            return decodedPassword;
         }
 
         public async Task DeleteUser(long id)

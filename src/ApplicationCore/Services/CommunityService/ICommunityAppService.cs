@@ -10,5 +10,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
         Task<Community> CreateCommunity(CreateCommunity input);
         Task<List<GetAllCommunityDto>> GetAll();
         Task<CommunityDto> GetById(long id);
+        Task<List<GetAllCommunityDto>> GetPopulars();
     }
 }

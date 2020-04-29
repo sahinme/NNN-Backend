@@ -13,14 +13,13 @@ using Microsoft.Nnn.ApplicationCore.Entities.Users;
 
 namespace Microsoft.Nnn.Infrastructure.Data
 {
-    //dotnet ef migrations add community2 --context NnnContext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
+    //dotnet ef migrations add postsss --context NnnContext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
     public class NnnContext : DbContext
     {
         public NnnContext(DbContextOptions<NnnContext> options) : base(options)
         {
         }
         public DbSet<User> Users { get; set; }
-        public DbSet<Category> Categories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
@@ -37,11 +36,6 @@ namespace Microsoft.Nnn.Infrastructure.Data
             builder.Entity<PostTag>()
                 .HasOne<Post>(sc => sc.Post)
                 .WithMany(s => s.Tags)
-                .HasForeignKey(sc => sc.PostId);
-            
-            builder.Entity<PostCategory>()
-                .HasOne<Post>(sc => sc.Post)
-                .WithMany(s => s.Categories)
                 .HasForeignKey(sc => sc.PostId);
             
             builder.Entity<CommunityUser>()

@@ -15,7 +15,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpPost]
-        public async Task<IActionResult> CreateCommunity(CreateCommunity input)
+        public async Task<IActionResult> CreateCommunity([FromForm] CreateCommunity input)
         {
             var result = await _communityAppService.CreateCommunity(input);
             return Ok(result);
@@ -32,6 +32,13 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         public async Task<IActionResult> GetById(long id)
         {
             var result = await _communityAppService.GetById(id);
+            return Ok(result);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetPopulars()
+        {
+            var result = await _communityAppService.GetPopulars();
             return Ok(result);
         }
 

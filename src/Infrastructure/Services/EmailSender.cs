@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.Nnn.ApplicationCore.Entities.EmailSettings;
@@ -49,7 +50,7 @@ namespace Microsoft.Nnn.Infrastructure.Services
                     {
                         // The third parameter is useSSL (true if the client should make an SSL-wrapped
                         // connection to the server; otherwise, false).
-                        await client.ConnectAsync(_emailSettings.MailServer, _emailSettings.MailPort, true);
+                        await client.ConnectAsync("smtp.gmail.com", 465);
                     }
                     else
                     {
@@ -57,7 +58,7 @@ namespace Microsoft.Nnn.Infrastructure.Services
                     }
 
                     // Note: only needed if the SMTP server requires authentication
-                    await client.AuthenticateAsync(_emailSettings.Sender, _emailSettings.Password);
+                    await client.AuthenticateAsync("iamfreeadmiral@gmail.com", "salopa44");
 
                     await client.SendAsync(mimeMessage);
 

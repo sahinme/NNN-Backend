@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Nnn.Infrastructure.Data;
 
 namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(NnnContext))]
-    partial class NnnContextModelSnapshot : ModelSnapshot
+    [Migration("20200429182025_bio")]
+    partial class bio
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,7 +41,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Comments.Comment", b =>
@@ -137,15 +139,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("CommentId");
-
                     b.Property<DateTime>("CreatedDate");
 
                     b.Property<string>("CreatorUserId");
-
-                    b.Property<long>("EntityId");
-
-                    b.Property<int>("EntityType");
 
                     b.Property<bool>("IsDeleted");
 
@@ -153,19 +149,13 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long?>("PostId");
-
-                    b.Property<long?>("ReplyId");
+                    b.Property<long>("PostId");
 
                     b.Property<long>("UserId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CommentId");
-
                     b.HasIndex("PostId");
-
-                    b.HasIndex("ReplyId");
 
                     b.HasIndex("UserId");
 
@@ -301,23 +291,25 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<long>("CommunityId");
 
-                    b.Property<string>("Content");
-
-                    b.Property<int>("ContentType");
-
                     b.Property<DateTime>("CreatedDate");
 
                     b.Property<string>("CreatorUserId");
 
-                    b.Property<bool>("IsDeleted");
+                    b.Property<string>("How");
 
-                    b.Property<string>("MediaContentPath");
+                    b.Property<bool>("IsDeleted");
 
                     b.Property<string>("ModifiedBy");
 
                     b.Property<DateTime>("ModifiedDate");
 
+                    b.Property<string>("Title");
+
                     b.Property<long>("UserId");
+
+                    b.Property<string>("Where");
+
+                    b.Property<string>("Why");
 
                     b.HasKey("Id");
 
@@ -365,15 +357,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("CommentId");
-
                     b.Property<DateTime>("CreatedDate");
 
                     b.Property<string>("CreatorUserId");
-
-                    b.Property<long>("EntityId");
-
-                    b.Property<int>("EntityType");
 
                     b.Property<bool>("IsDeleted");
 
@@ -381,19 +367,13 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long?>("PostId");
-
-                    b.Property<long?>("ReplyId");
+                    b.Property<long>("PostId");
 
                     b.Property<long>("UserId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CommentId");
-
                     b.HasIndex("PostId");
-
-                    b.HasIndex("ReplyId");
 
                     b.HasIndex("UserId");
 
@@ -472,17 +452,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Likes.Like", b =>
                 {
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Comments.Comment", "Comment")
-                        .WithMany()
-                        .HasForeignKey("CommentId");
-
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
                         .WithMany("Likes")
-                        .HasForeignKey("PostId");
-
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Replies.Reply", "Reply")
-                        .WithMany()
-                        .HasForeignKey("ReplyId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
                         .WithMany()
@@ -498,7 +471,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
-                        .WithMany()
+                        .WithMany("Categories")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -544,17 +517,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Unlikes.Unlike", b =>
                 {
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Comments.Comment", "Comment")
-                        .WithMany()
-                        .HasForeignKey("CommentId");
-
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
                         .WithMany("Unlikes")
-                        .HasForeignKey("PostId");
-
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Replies.Reply", "Reply")
-                        .WithMany()
-                        .HasForeignKey("ReplyId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
                         .WithMany()

@@ -28,7 +28,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         
         [AllowAnonymous]
         [HttpPost]
-        [Route("userToken")]
+        [Route("token")]
         public async Task<IActionResult>  Post([FromBody]LoginDto request)
         {
             if (ModelState.IsValid)
@@ -55,7 +55,10 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                     signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SigningKey"])),//appsettings.json içerisinde bulunan signingkey değeri
                         SecurityAlgorithms.HmacSha256)
                 );
-                return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+
+                var userData = await _userService.GetByUsername(request.Username);
+                
+                return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token),success=true,user=userData });
             }
             return BadRequest();
         }

@@ -8,6 +8,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
         public long Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string LogoPath { get; set; }
        public List<CommunityUserDto> Members { get; set; }
     }
 

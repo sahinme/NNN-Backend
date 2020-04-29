@@ -11,12 +11,14 @@ namespace Microsoft.Nnn.ApplicationCore.Interfaces
     {
         Task<User> CreateUser(CreateUserDto input);
         Task<UserDto> GetUserById(int id);
+        Task<UserDto> GetByUsername(string username);
         Task UpdateUser(UpdateUserDto input);
         Task<bool> Login(LoginDto input);
         Task DeleteUser(long id);
         Task<CommunityUser> JoinCommunity(long userId,long communityId);
         Task LeaveFromCommunity(long userId,long communityId);
         Task<List<GetAllCommunityDto>> GetUserCommunities(long userId);
-        
+        Task<bool> VerifyEmail(string verificationCode);
+
     }
 }

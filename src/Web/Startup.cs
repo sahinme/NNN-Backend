@@ -19,6 +19,7 @@ using System.Net.Mime;
 using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Nnn.ApplicationCore.Entities.EmailSettings;
@@ -27,6 +28,7 @@ using Microsoft.Nnn.ApplicationCore.Services;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CommentService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService;
+using Microsoft.Nnn.ApplicationCore.Services.LikeService;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService;
 using Microsoft.Nnn.ApplicationCore.Services.UserService;
@@ -84,6 +86,7 @@ namespace Microsoft.Nnn.Web
             services.AddScoped<ICommentAppService, CommentAppService>();
             services.AddScoped<IReplyAppService, ReplyAppService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ILikeAppService, LikeAppService>();
             services.AddScoped<ICommunityAppService, CommunityAppService>();
             services.AddScoped<IBlobService, BlobService>();
             services.Configure<CatalogSettings>(Configuration);
@@ -110,6 +113,16 @@ namespace Microsoft.Nnn.Web
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SigningKey"])),
                     };
                 });
+            
+            // configure token generation
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<NnnContext>()
+                .AddDefaultTokenProviders();
+    
+            // configure identity options
+            services.Configure<IdentityOptions>(o => {
+                o.SignIn.RequireConfirmedEmail = true;
+            });
             
             // Add memory cache services
             services.AddMemoryCache();
@@ -186,6 +199,8 @@ namespace Microsoft.Nnn.Web
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
+            
+            app.UseIdentity();
 
             //app.UseDeveloperExceptionPage();
             app.UseHealthChecks("/health",

@@ -51,7 +51,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.BlobService
 
         public static string GetImageUrl(string path)
         {
-            return "https://edutrostorageaccount.blob.core.windows.net/edutrocontainer/" + path;
+            return "https://edutrostorageaccount.blob.core.windows.net/nnncontainer/" + path;
         }
     }
 }

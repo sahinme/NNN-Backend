@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Nnn.Infrastructure.Data;
 
 namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(NnnContext))]
-    partial class NnnContextModelSnapshot : ModelSnapshot
+    [Migration("20200429215221_likes")]
+    partial class likes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,7 +41,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Comments.Comment", b =>
@@ -301,23 +303,25 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<long>("CommunityId");
 
-                    b.Property<string>("Content");
-
-                    b.Property<int>("ContentType");
-
                     b.Property<DateTime>("CreatedDate");
 
                     b.Property<string>("CreatorUserId");
 
-                    b.Property<bool>("IsDeleted");
+                    b.Property<string>("How");
 
-                    b.Property<string>("MediaContentPath");
+                    b.Property<bool>("IsDeleted");
 
                     b.Property<string>("ModifiedBy");
 
                     b.Property<DateTime>("ModifiedDate");
 
+                    b.Property<string>("Title");
+
                     b.Property<long>("UserId");
+
+                    b.Property<string>("Where");
+
+                    b.Property<string>("Why");
 
                     b.HasKey("Id");
 
@@ -498,7 +502,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
-                        .WithMany()
+                        .WithMany("Categories")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

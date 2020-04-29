@@ -19,6 +19,10 @@ namespace Nnn.ApplicationCore.Services.UserService.Dto
         [EmailAddress(ErrorMessage = "Gecersiz e-posta adresi")]
         public string EmailAddress { get; set; }
         public IFormFile ProfileImage { get; set; }
+        
+        [MaxLength(181)]
+        public string Bio { get; set; }
+        
        
     }
 }

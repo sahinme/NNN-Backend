@@ -34,6 +34,8 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                 return BadRequest();
             }
             var user = await _userService.CreateUser(input);
+            var subject = "http:saalla.com/" + user.VerificationCode;
+            await _emailSender.SendEmailAsync(user.EmailAddress, "E-posta onaylama",subject );
             return Ok(user);
         }
         
@@ -59,7 +61,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateUser(UpdateUserDto input)
+        public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto input)
         {
             await _userService.UpdateUser(input);
             return Ok();
