@@ -13,10 +13,8 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Comments
         public string Content { get; set; }
         public long PostId { get; set; }
         public long UserId { get; set; }    
-        
         public User User { get; set; }
         public Post Post { get; set; }
-        
         public virtual ICollection<Reply> Replies { get; set; }
         public virtual ICollection<CommentLike> Likes { get; set; }
     }

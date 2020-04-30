@@ -8,6 +8,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService.Dto
         public string Content { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public ReplyUserDto ReplyUserInfo { get; set; }
+        public long LikeCount { get; set; }
     }
 
     public class ReplyUserDto

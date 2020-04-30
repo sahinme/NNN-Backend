@@ -35,5 +35,26 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             var post = await _postAppService.GetUserPosts(userId);
             return Ok(post);
         }
+        
+        [HttpDelete]
+        public async Task<IActionResult> Delete(long id)
+        {
+             await _postAppService.Delete(id);
+            return Ok();
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> LikePost(CreateLikeDto input)
+        {
+            var result =  await _postAppService.LikePost(input);
+            return Ok(result);
+        }
+        
+        [HttpDelete]
+        public async Task<IActionResult> UnLikePost(CreateLikeDto input)
+        {
+            var result =  await _postAppService.UnlikePost(input);
+            return Ok(result);
+        }
     }
 }

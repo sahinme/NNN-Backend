@@ -9,6 +9,7 @@ using Microsoft.Nnn.ApplicationCore.Entities.Likes;
 using Microsoft.Nnn.ApplicationCore.Entities.PostCategories;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.PostTags;
+using Microsoft.Nnn.ApplicationCore.Entities.Unlikes;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
@@ -22,6 +23,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
     public class PostAppService:IPostAppService
     {
         private readonly IAsyncRepository<Post> _postRepository;
+        private readonly IAsyncRepository<PostLike> _postLikeRepository;
+        private readonly IAsyncRepository<Unlike> _unlikeRepository;
         private readonly IAsyncRepository<PostCategory> _postCategoryRepository;
         private readonly IAsyncRepository<Tag> _tagRepository;
         private readonly IAsyncRepository<PostTag> _postTagRepository;
@@ -29,13 +32,15 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
 
         public PostAppService(IAsyncRepository<Post> postRepository,IAsyncRepository<PostCategory> postCategoryRepository,
             IAsyncRepository<PostTag> postTagRepository, IAsyncRepository<Tag> tagRepository,
-            IBlobService blobService)
+            IBlobService blobService,IAsyncRepository<PostLike> postLikeRepository,IAsyncRepository<Unlike> unlikeRepository)
         {
             _postRepository = postRepository;
             _postCategoryRepository = postCategoryRepository;
             _postTagRepository = postTagRepository;
             _tagRepository = tagRepository;
             _blobService = blobService;
+            _unlikeRepository = unlikeRepository;
+            _postLikeRepository = postLikeRepository;
         }
         
         public async Task<Post> CreatePost(CreatePostDto input)
@@ -93,7 +98,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         public async Task<PostDto> GetPostById(long id)
         {
             var post = await _postRepository.GetAll().Where(x => x.Id == id).Include(x => x.User)
-                .Include(x=>x.Comments).ThenInclude(x=>x.Replies)
+                .Include(x=>x.Comments).ThenInclude(x=>x.Replies).ThenInclude(x=>x.Likes)
+                .Include(x=>x.Comments).ThenInclude(x=>x.Likes)
                 .Include(x=>x.Tags).ThenInclude(x=>x.Tag)
                 .Select(x => new PostDto
                 {
@@ -108,6 +114,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         Id = c.Id,
                         Content = c.Content,
                         CreatedDateTime = c.CreatedDate,
+                        LikeCount = c.Likes.Count,
                         CommentUserInfo = new CommentUserDto
                         {
                             Id = c.User.Id,
@@ -119,6 +126,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                             Id = r.Id,
                             Content = r.Content,
                             CreatedDateTime = r.CreatedDate,
+                            LikeCount = r.Likes.Count,
                             ReplyUserInfo = new ReplyUserDto
                             {
                                 Id = r.User.Id,
@@ -140,7 +148,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
 
         public async Task<List<UserPostsDto>> GetUserPosts(long userId)
         {
-            var result = await _postRepository.GetAll().Where(x => x.IsDeleted == false && x.UserId == userId).Select(
+            var result = await _postRepository.GetAll().Where(x => x.IsDeleted == false && x.UserId == userId).
+                Include(x=>x.Community).Select(
                 x => new UserPostsDto
                 {
                     Id = x.Id,
@@ -150,9 +159,65 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     CreatedDateTime = x.CreatedDate,
                     CommentsCount = x.Comments.Count,
                     LikesCount = x.Likes.Count,
-                    UnlikesCount = x.Unlikes.Count
+                    UnlikesCount = x.Unlikes.Count,
+                    Community = new PostCommunityDto
+                    {
+                        Id = x.Community.Id,
+                        Name = x.Community.Name
+                    }
                 }).ToListAsync();
             return result;
+        }
+
+        public async Task<PostLike> LikePost(CreateLikeDto input)
+        {
+            var alreadyLiked = await _postLikeRepository.GetAll()
+                .FirstOrDefaultAsync(x => x.UserId == input.UserId && x.PostId == input.PostId);
+            if(alreadyLiked!=null) throw new Exception("Bu islem zaten yapilmis");
+            
+            var isUnliked = await _unlikeRepository.GetAll()
+                .Where(x => x.UserId == input.UserId && x.PostId == input.PostId)
+                .FirstOrDefaultAsync();
+
+            if (isUnliked != null)
+            {
+                isUnliked.IsDeleted = true;
+                await _unlikeRepository.UpdateAsync(isUnliked);
+            }
+            
+            var model = new PostLike
+            {
+                UserId = input.UserId,
+                PostId = input.PostId
+            };
+            await _postLikeRepository.AddAsync(model);
+            return model;
+        }
+        
+        public async Task<Unlike> UnlikePost(CreateLikeDto input)
+        {
+            var alreadyUnliked = await _unlikeRepository.GetAll()
+                .FirstOrDefaultAsync(x => x.UserId == input.UserId && x.PostId == input.PostId);
+            if(alreadyUnliked!=null) throw new Exception("Bu islem zaten yapilmis");
+            
+            var isLiked = await _postLikeRepository.GetAll()
+                .Where(x => x.UserId == input.UserId && x.PostId == input.PostId)
+                .FirstOrDefaultAsync();
+
+            if (isLiked != null)
+            {
+                isLiked.IsDeleted = true;
+                await _postLikeRepository.UpdateAsync(isLiked);
+            }
+            
+            var model = new Unlike
+            {
+                UserId = input.UserId,
+                PostId = input.PostId
+            };
+            await _unlikeRepository.AddAsync(model);
+            
+            return model;
         }
     }
 }

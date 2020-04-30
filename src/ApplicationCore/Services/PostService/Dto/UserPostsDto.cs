@@ -13,5 +13,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public long CommentsCount { get; set; }
         public long LikesCount { get; set; }
         public long UnlikesCount { get; set; }
+        public PostCommunityDto Community { get; set; }
+    }
+
+    public class PostCommunityDto
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
     }
 }
