@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -11,15 +12,16 @@ using Microsoft.Nnn.ApplicationCore.Entities.PostTags;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.CommentService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.ReplyService.Dto;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.PostService
 {
     public class PostAppService:IPostAppService
     {
         private readonly IAsyncRepository<Post> _postRepository;
-        private readonly IAsyncRepository<Like> _likeRepository;
         private readonly IAsyncRepository<PostCategory> _postCategoryRepository;
         private readonly IAsyncRepository<Tag> _tagRepository;
         private readonly IAsyncRepository<PostTag> _postTagRepository;
@@ -27,14 +29,13 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
 
         public PostAppService(IAsyncRepository<Post> postRepository,IAsyncRepository<PostCategory> postCategoryRepository,
             IAsyncRepository<PostTag> postTagRepository, IAsyncRepository<Tag> tagRepository,
-            IBlobService blobService,IAsyncRepository<Like> likeRepository)
+            IBlobService blobService)
         {
             _postRepository = postRepository;
             _postCategoryRepository = postCategoryRepository;
             _postTagRepository = postTagRepository;
             _tagRepository = tagRepository;
             _blobService = blobService;
-            _likeRepository = likeRepository;
         }
         
         public async Task<Post> CreatePost(CreatePostDto input)
@@ -92,6 +93,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         public async Task<PostDto> GetPostById(long id)
         {
             var post = await _postRepository.GetAll().Where(x => x.Id == id).Include(x => x.User)
+                .Include(x=>x.Comments).ThenInclude(x=>x.Replies)
                 .Include(x=>x.Tags).ThenInclude(x=>x.Tag)
                 .Select(x => new PostDto
                 {
@@ -100,22 +102,57 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     ContentType = x.ContentType,
                     ContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     CreatedDateTime = x.CreatedDate,
-                    UserInfo = new PostUserDto
+                    LikeCount = x.Likes.Count,
+                    Comments = x.Comments.Select(c => new CommentDto
                     {
-                        Id = x.User.Id,
-                        UserName = x.User.Username,
-                        ProfileImagePath = x.User.ProfileImagePath
-                    },
-                    Tags = x.Tags.Select(t=>new TagDto
-                    {
-                        Id = t.Tag.Id,
-                        Text = t.Tag.Text
-                    }).ToList(),
+                        Id = c.Id,
+                        Content = c.Content,
+                        CreatedDateTime = c.CreatedDate,
+                        CommentUserInfo = new CommentUserDto
+                        {
+                            Id = c.User.Id,
+                            UserName = c.User.Username,
+                            ProfileImagePath = c.User.ProfileImagePath
+                        },
+                        Replies = c.Replies.Select(r => new ReplyDto
+                        {
+                            Id = r.Id,
+                            Content = r.Content,
+                            CreatedDateTime = r.CreatedDate,
+                            ReplyUserInfo = new ReplyUserDto
+                            {
+                                Id = r.User.Id,
+                                ProfileImagePath = BlobService.BlobService.GetImageUrl(r.User.ProfileImagePath),
+                                UserName = r.User.Username
+                            }
+                        }).ToList()
+                    }).ToList()
                 }).FirstOrDefaultAsync();
-            var likes = await _likeRepository.GetAll()
-                .Where(x => x.EntityType == EntityType.Post && x.EntityId == post.Id).CountAsync();
-            post.LikeCount = likes;
             return post;
+        }
+
+        public async Task Delete(long id)
+        {
+            var post = await _postRepository.GetByIdAsync(id);
+            post.IsDeleted = true;
+            await _postRepository.UpdateAsync(post);
+        }
+
+        public async Task<List<UserPostsDto>> GetUserPosts(long userId)
+        {
+            var result = await _postRepository.GetAll().Where(x => x.IsDeleted == false && x.UserId == userId).Select(
+                x => new UserPostsDto
+                {
+                    Id = x.Id,
+                    Content = x.Content,
+                    MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
+                    ContentType = x.ContentType,
+                    CreatedDateTime = x.CreatedDate,
+                    CommentsCount = x.Comments.Count,
+                    LikesCount = x.Likes.Count,
+                    UnlikesCount = x.Unlikes.Count
+                }).ToListAsync();
+            return result;
         }
     }
 }

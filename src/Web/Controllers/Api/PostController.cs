@@ -28,5 +28,12 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             var post = await _postAppService.GetPostById(id);
             return Ok(post);
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetUserPosts(long userId)
+        {
+            var post = await _postAppService.GetUserPosts(userId);
+            return Ok(post);
+        }
     }
 }

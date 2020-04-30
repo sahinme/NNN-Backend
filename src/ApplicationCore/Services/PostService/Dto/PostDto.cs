@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.CommentService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.Dto;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
@@ -14,6 +15,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public ContentType ContentType { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public PostUserDto UserInfo { get; set; }
+        public List<CommentDto> Comments { get; set; }
         public List<TagDto> Tags { get; set; }
         public long LikeCount { get; set; }
     }

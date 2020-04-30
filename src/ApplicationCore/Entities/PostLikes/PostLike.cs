@@ -6,15 +6,12 @@ using Microsoft.Nnn.ApplicationCore.Interfaces;
  
  namespace Microsoft.Nnn.ApplicationCore.Entities.Likes
  {
-     public class Like:BaseEntity,IAggregateRoot
+     public class PostLike:BaseEntity,IAggregateRoot
      {
          public long UserId { get; set; }
-         public long EntityId { get; set; }
-         public EntityType EntityType { get; set; }
-         
+         public long PostId { get; set; }
+
          public User User { get; set; }
          public Post Post { get; set; }
-         public Comment Comment { get; set; } 
-         public Reply Reply { get; set; }
      }
  }

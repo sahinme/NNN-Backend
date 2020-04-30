@@ -21,7 +21,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Posts
         public User User { get; set; }
         
         public virtual ICollection<Comment> Comments { get; set; }
-        public virtual ICollection<Like> Likes { get; set; }
+        public virtual ICollection<PostLike> Likes { get; set; }
         public virtual ICollection<Unlike> Unlikes { get; set; }
         public virtual ICollection<PostTag> Tags { get; set; }
     }

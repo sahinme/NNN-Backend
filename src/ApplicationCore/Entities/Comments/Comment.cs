@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Nnn.ApplicationCore.Entities.CommentLikes;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.Replies;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
@@ -17,5 +18,6 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Comments
         public Post Post { get; set; }
         
         public virtual ICollection<Reply> Replies { get; set; }
+        public virtual ICollection<CommentLike> Likes { get; set; }
     }
 }
