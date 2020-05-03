@@ -59,7 +59,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 EmailAddress = x.EmailAddress,
                 Bio = x.Bio,
                 Gender = x.Gender,
-                ProfileImagePath = BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
+                ProfileImagePath = x.ProfileImagePath == null ? null : BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
             }).FirstOrDefaultAsync();
             return user;
         }
@@ -73,7 +73,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 Bio = x.Bio,
                 EmailAddress = x.EmailAddress,
                 Gender = x.Gender,
-                ProfileImagePath = BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
+                ProfileImagePath = x.ProfileImagePath == null ? null : BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
             }).FirstOrDefaultAsync();
             return user;    
         }

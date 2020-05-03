@@ -14,10 +14,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public string ContentPath { get; set; }
         public ContentType ContentType { get; set; }
         public DateTime CreatedDateTime { get; set; }
+        public long LikeCount { get; set; }
+        public long UnlikeCount { get; set; }
+        public PostCommunityDto Community { get; set; }
         public PostUserDto UserInfo { get; set; }
         public List<CommentDto> Comments { get; set; }
-        public List<TagDto> Tags { get; set; }
-        public long LikeCount { get; set; }
+       
     }
 
     public class PostUserDto

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Nnn.Infrastructure.Data;
 
 namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(NnnContext))]
-    partial class NnnContextModelSnapshot : ModelSnapshot
+    [Migration("20200501194939_commwithpost")]
+    partial class commwithpost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

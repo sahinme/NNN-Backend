@@ -26,6 +26,13 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             return Ok(result);
         }
         
+        [HttpGet]
+        public async Task<IActionResult> GetByUsername(string username)
+        {
+            var result = await _userService.GetByUsername(username);
+            return Ok(result);
+        }
+        
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromForm]  CreateUserDto input)
         {

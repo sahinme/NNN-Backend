@@ -20,5 +20,19 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             var reply = await _replyAppService.CreateReply(input);
             return Ok(reply);
         }
+        
+        [HttpPost]
+        public async  Task<IActionResult> Like(long userId, long replyId)
+        {
+            var reply = await _replyAppService.Like(userId,replyId);
+            return Ok(reply);
+        }
+        
+        [HttpDelete]
+        public async  Task<IActionResult> Unlike(long userId, long replyId)
+        {
+            await _replyAppService.Unlike(userId,replyId);
+            return Ok();
+        }
     }
 }

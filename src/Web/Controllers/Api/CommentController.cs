@@ -13,6 +13,13 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         {
             _commentAppService = commentAppService;
         }
+        
+         [HttpPost]
+                public async Task<IActionResult> Create(CreateCommentDto input)
+                {
+                    var result = await _commentAppService.CreateComment(input);
+                    return Ok(result);
+                }
 
         [HttpGet]
         public async Task<IActionResult> GetPostComments(long postId)

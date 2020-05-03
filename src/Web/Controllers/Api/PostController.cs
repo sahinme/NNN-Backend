@@ -30,11 +30,26 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetUserPosts(long userId)
+        public async Task<IActionResult> GetUserPosts([FromQuery] IdOrUsernameDto input)
         {
-            var post = await _postAppService.GetUserPosts(userId);
+            var post = await _postAppService.GetUserPosts(input);
             return Ok(post);
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> HomePosts(long userId)
+        {
+            var post = await _postAppService.HomePosts(userId);
+            return Ok(post);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult>  UnauthorizedHomePost()
+        {
+            var result = await _postAppService.UnauthorizedHomePosts();
+            return Ok(result);
+        }
+        
         
         [HttpDelete]
         public async Task<IActionResult> Delete(long id)
@@ -49,7 +64,6 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             var result =  await _postAppService.LikePost(input);
             return Ok(result);
         }
-        
         [HttpDelete]
         public async Task<IActionResult> UnLikePost(CreateLikeDto input)
         {
