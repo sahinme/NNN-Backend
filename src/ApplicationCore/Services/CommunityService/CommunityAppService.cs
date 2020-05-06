@@ -96,16 +96,17 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             return result;
         }
 
-        public async Task<List<GetAllCommunityDto>> GetPopulars()
+        public async Task<List<GetAllCommunityDto>> GetPopulars(long? userId)
         {
-            var result = await _communityRepository.GetAll().Where(x => x.IsDeleted == false)
-                .Include(x => x.Users).ThenInclude(x => x.User).Select(x=> new GetAllCommunityDto
+            var result = await _communityRepository.GetAll().Where(x => x.IsDeleted == false )
+                .Include(x => x.Users).ThenInclude(x => x.User)
+                .Select(x=> new GetAllCommunityDto
                 {
                     Id = x.Id,
                     Name = x.Name,
                     Description = x.Description,
                     MemberCount = x.Users.Count,
-                    LogoPath = BlobService.BlobService.GetImageUrl(x.LogoPath)
+                    LogoPath = x.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.LogoPath)
                 }).OrderByDescending(x=>x.MemberCount).Take(5).ToListAsync();
             return result;
         }

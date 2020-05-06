@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Nnn.ApplicationCore.Entities.Likes;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
@@ -13,6 +14,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public DateTime CreatedDateTime { get; set; }
         public long CommentsCount { get; set; }
         public long LikesCount { get; set; }
+        public string LinkUrl { get; set; }
+        public PostLike IsLiked { get; set; }
         public long UnlikesCount { get; set; }
         public PostCommunityDto Community { get; set; }
         public PostUserDto User { get; set; }

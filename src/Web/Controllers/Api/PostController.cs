@@ -23,9 +23,9 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPostById(long id)
+        public async Task<IActionResult> GetPostById(long id,long? userId)
         {
-            var post = await _postAppService.GetPostById(id);
+            var post = await _postAppService.GetPostById(id,userId);
             return Ok(post);
         }
         
@@ -64,6 +64,14 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             var result =  await _postAppService.LikePost(input);
             return Ok(result);
         }
+        
+        [HttpDelete]
+        public async Task<IActionResult> ConvertLike(long id)
+        {
+            await _postAppService.ConvertLike(id);
+            return Ok();
+        }
+        
         [HttpDelete]
         public async Task<IActionResult> UnLikePost(CreateLikeDto input)
         {

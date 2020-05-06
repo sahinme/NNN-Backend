@@ -8,6 +8,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public long Id { get; set; }
         public string Content { get; set; }
         public string MediaContentPath { get; set; }
+        public string LinkUrl { get; set; }
         public ContentType ContentType { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public long CommentsCount { get; set; }

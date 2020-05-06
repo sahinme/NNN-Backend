@@ -130,6 +130,13 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
 
         public async Task<CommunityUser> JoinCommunity(long userId, long communityId)
         {
+            var isExist = await _communityUserRepository.GetAll()
+                .Where(x => x.IsDeleted == false && x.UserId==userId && x.CommunityId==communityId )
+                .FirstOrDefaultAsync();
+            if (isExist != null)
+            {
+                throw new Exception("bu islem zaten yapilmis");
+            }
             var model = new CommunityUser
             {
                 UserId = userId,
@@ -158,6 +165,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                     Id = x.Community.Id,
                     Name = x.Community.Name,
                     Description = x.Community.Description,
+                    LogoPath = x.Community.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.Community.LogoPath),
                     MemberCount = x.Community.Users.Count
                 }).ToListAsync();
             return result;

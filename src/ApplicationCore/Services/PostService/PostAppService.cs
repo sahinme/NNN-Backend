@@ -57,13 +57,20 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             {
                Content = input.Content,
                CommunityId = input.CommunityId,
-               UserId = input.UserId
+               UserId = input.UserId,
+               ContentType = input.ContentType
             };
+            
             if (input.ContentFile != null)
             {
                 var path = await _blobService.InsertFile(input.ContentFile);
                 post.MediaContentPath = path;
                 post.ContentType = ContentType.Image;
+            }
+
+            if (input.ContentType == ContentType.Link)
+            {
+                post.LinkUrl = input.LinkUrl;
             }
             await _postRepository.AddAsync(post);
             
@@ -103,7 +110,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             return post;
         }
 
-        public async Task<PostDto> GetPostById(long id)
+        public async Task<PostDto> GetPostById(long id,long? userId)
         {
             var post = await _postRepository.GetAll().Where(x => x.Id == id).Include(x => x.User)
                 .Include(x=>x.Comments).ThenInclude(x=>x.Replies).ThenInclude(x=>x.Likes)
@@ -113,6 +120,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 {
                     Id = x.Id,
                     Content = x.Content,
+                    LinkUrl = x.LinkUrl,
                     ContentType = x.ContentType,
                     ContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     CreatedDateTime = x.CreatedDate,
@@ -156,6 +164,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         }).ToList()
                     }).ToList()
                 }).FirstOrDefaultAsync();
+            if (userId == null) return post;
+                var isLiked = await _postLikeRepository.GetAll().Where(x => x.IsDeleted==false && x.UserId == userId && x.PostId==id )
+                    .FirstOrDefaultAsync();
+                post.IsLiked = isLiked;
             return post;
         }
 
@@ -175,11 +187,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 {
                     Id = x.Id,
                     Content = x.Content,
+                    LinkUrl = x.LinkUrl,
                     MediaContentPath = x.MediaContentPath == null ? null : BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     ContentType = x.ContentType,
                     CreatedDateTime = x.CreatedDate,
                     CommentsCount = x.Comments.Count,
-                    LikesCount = x.Likes.Count,
+                    LikesCount = x.Likes.Count(l=>l.IsDeleted==false),
                     UnlikesCount = x.Unlikes.Count,
                     Community = new PostCommunityDto
                     {
@@ -193,7 +206,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         public async Task<PostLike> LikePost(CreateLikeDto input)
         {
             var alreadyLiked = await _postLikeRepository.GetAll()
-                .FirstOrDefaultAsync(x => x.UserId == input.UserId && x.PostId == input.PostId);
+                .FirstOrDefaultAsync(x => x.IsDeleted==false && x.UserId == input.UserId && x.PostId == input.PostId);
             if(alreadyLiked!=null) throw new Exception("Bu islem zaten yapilmis");
             
             var isUnliked = await _unlikeRepository.GetAll()
@@ -213,6 +226,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             };
             await _postLikeRepository.AddAsync(model);
             return model;
+        }
+        
+        public async Task ConvertLike(long id)
+        {
+            var result = await _postLikeRepository.GetByIdAsync(id);
+            if (result == null) throw new Exception("Boyle bir islem yok => "+id) ;
+            result.IsDeleted = true;
+            await _postLikeRepository.UpdateAsync(result);
         }
         
         public async Task<Unlike> UnlikePost(CreateLikeDto input)
@@ -245,6 +266,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         {
             var result = await  _communityUserRepository.GetAll().Where(x => x.UserId == userId)
                 .Include(x => x.Community).ThenInclude(x => x.Posts)
+                .ThenInclude(x=>x.Likes)
                 .Select(x => new Example
                 {
                     Data = x.Community.Posts.Select(p => new GetAllPostDto
@@ -252,15 +274,18 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         Id = p.Id,
                         Content = p.Content,
                         ContentType = p.ContentType,
+                        LinkUrl = p.LinkUrl,
                         MediaContentPath = BlobService.BlobService.GetImageUrl(p.MediaContentPath),
                         CreatedDateTime = p.CreatedDate,
+                        LikesCount = p.Likes.Count(l=>l.IsDeleted==false),
+                        IsLiked = p.Likes.FirstOrDefault(a=>a.UserId==userId && a.IsDeleted==false),
                         Community = new PostCommunityDto
                         {
                             Id = x.Community.Id,
                             Name = x.Community.Name
                         },
                         User = new PostUserDto
-                        {
+                        {    
                             Id = x.User.Id,
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath),
                             UserName = x.User.Username
@@ -282,11 +307,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     {
                         Id = x.Id,
                         Content = x.Content,
+                        LinkUrl = x.LinkUrl,
                         MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                         ContentType = x.ContentType,
                         CreatedDateTime = x.CreatedDate,
                         CommentsCount = x.Comments.Count,
-                        LikesCount = x.Likes.Count,
+                        LikesCount = x.Likes.Count(l=>l.IsDeleted==false),
                         UnlikesCount = x.Unlikes.Count,
                         Community = new PostCommunityDto
                         {

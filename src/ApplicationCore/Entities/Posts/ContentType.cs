@@ -5,6 +5,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Posts
         Image  = 10,
         Video = 20,
         Pdf = 30,
-        Gif = 40
+        Gif = 40,
+        Link=50
     }
 }

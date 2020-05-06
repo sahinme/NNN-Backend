@@ -36,9 +36,9 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetPopulars()
+        public async Task<IActionResult> GetPopulars(long userId)
         {
-            var result = await _communityAppService.GetPopulars();
+            var result = await _communityAppService.GetPopulars(userId);
             return Ok(result);
         }
 

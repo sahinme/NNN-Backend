@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
 {
@@ -8,6 +9,9 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public IFormFile ContentFile { get; set; }
         public long CommunityId { get; set; }
         public long UserId { get; set; }
+        public ContentType ContentType { get; set; }
+
+        public string LinkUrl { get; set; }
         //public string[] Tags { get; set; }
     }
 }
