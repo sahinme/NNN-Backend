@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
@@ -36,14 +37,26 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromForm]  CreateUserDto input)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest();
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                var user = await _userService.CreateUser(input);
+                var subject = "http:saalla.com/" + user.VerificationCode;
+                await _emailSender.SendEmailAsync(user.EmailAddress, "E-posta onaylama",subject );
+                user.Password = null;
+                user.VerificationCode = null;
+                return Ok(user);
             }
-            var user = await _userService.CreateUser(input);
-            var subject = "http:saalla.com/" + user.VerificationCode;
-            await _emailSender.SendEmailAsync(user.EmailAddress, "E-posta onaylama",subject );
-            return Ok(user);
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return Ok(new {message = e});
+                throw;
+            }
+           
         }
         
         [HttpPost]

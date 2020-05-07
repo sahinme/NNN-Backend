@@ -1,23 +1,16 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Nnn.ApplicationCore.Entities;
-using Microsoft.Nnn.ApplicationCore.Entities.Categories;
-using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
-using Microsoft.Nnn.ApplicationCore.Entities.Likes;
 using Microsoft.Nnn.ApplicationCore.Entities.PostCategories;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.PostTags;
-using Microsoft.Nnn.ApplicationCore.Entities.Unlikes;
+using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
-using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.CommentService.Dto;
-using Microsoft.Nnn.ApplicationCore.Services.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService.Dto;
 
@@ -26,8 +19,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
     public class PostAppService:IPostAppService
     {
         private readonly IAsyncRepository<Post> _postRepository;
-        private readonly IAsyncRepository<PostLike> _postLikeRepository;
-        private readonly IAsyncRepository<Unlike> _unlikeRepository;
+        private readonly IAsyncRepository<PostVote> _postVoteRepository;
         private readonly IAsyncRepository<User> _userRepository;
         private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
         private readonly IAsyncRepository<PostCategory> _postCategoryRepository;
@@ -37,18 +29,19 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
 
         public PostAppService(IAsyncRepository<Post> postRepository,IAsyncRepository<PostCategory> postCategoryRepository,
             IAsyncRepository<PostTag> postTagRepository, IAsyncRepository<Tag> tagRepository,
-            IBlobService blobService,IAsyncRepository<PostLike> postLikeRepository,IAsyncRepository<Unlike> unlikeRepository,
-            IAsyncRepository<User> userRepository,IAsyncRepository<CommunityUser> communityUserRepository)
+            IBlobService blobService,
+            IAsyncRepository<User> userRepository,IAsyncRepository<CommunityUser> communityUserRepository,
+            IAsyncRepository<PostVote> postVoteRepository)
         {
             _postRepository = postRepository;
             _postCategoryRepository = postCategoryRepository;
             _postTagRepository = postTagRepository;
             _tagRepository = tagRepository;
             _blobService = blobService;
-            _unlikeRepository = unlikeRepository;
-            _postLikeRepository = postLikeRepository;
             _userRepository = userRepository;
             _communityUserRepository = communityUserRepository;
+            _postVoteRepository = postVoteRepository;
+
         }
         
         public async Task<Post> CreatePost(CreatePostDto input)
@@ -122,10 +115,9 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     Content = x.Content,
                     LinkUrl = x.LinkUrl,
                     ContentType = x.ContentType,
+                    UserPostVote = x.Votes.FirstOrDefault(u=>u.IsDeleted==false && u.UserId==userId && u.PostId==x.Id ),
                     ContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     CreatedDateTime = x.CreatedDate,
-                    LikeCount = x.Likes.Count(l=>l.IsDeleted==false),
-                    UnlikeCount = x.Unlikes.Count(u=>u.IsDeleted==false),
                     Community = new PostCommunityDto
                     {
                         Id = x.Community.Id,
@@ -164,10 +156,11 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         }).ToList()
                     }).ToList()
                 }).FirstOrDefaultAsync();
-            if (userId == null) return post;
-                var isLiked = await _postLikeRepository.GetAll().Where(x => x.IsDeleted==false && x.UserId == userId && x.PostId==id )
-                    .FirstOrDefaultAsync();
-                post.IsLiked = isLiked;
+
+            var dislikes = await _postVoteRepository.GetAll().Where(x => x.IsDeleted == false && x.PostId==post.Id && x.Value == -1).ToListAsync();
+            var likes = await _postVoteRepository.GetAll().Where(x => x.IsDeleted == false && x.PostId==post.Id && x.Value == 1).ToListAsync();
+            var voteCount = likes.Count - dislikes.Count;
+            post.VoteCount = voteCount;
             return post;
         }
 
@@ -188,12 +181,13 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     Id = x.Id,
                     Content = x.Content,
                     LinkUrl = x.LinkUrl,
+                    UserPostVote = x.Votes.FirstOrDefault(p=>p.IsDeleted==false &&
+                                                             (p.UserId == input.Id || p.User.Username == input.Username) && p.PostId==x.Id ),
                     MediaContentPath = x.MediaContentPath == null ? null : BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     ContentType = x.ContentType,
                     CreatedDateTime = x.CreatedDate,
+                    VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
                     CommentsCount = x.Comments.Count,
-                    LikesCount = x.Likes.Count(l=>l.IsDeleted==false),
-                    UnlikesCount = x.Unlikes.Count,
                     Community = new PostCommunityDto
                     {
                         Id = x.Community.Id,
@@ -203,70 +197,37 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             return result;
         }
 
-        public async Task<PostLike> LikePost(CreateLikeDto input)
+        public async Task<PostVote> Vote(CreateVoteDto input)
         {
-            var alreadyLiked = await _postLikeRepository.GetAll()
-                .FirstOrDefaultAsync(x => x.IsDeleted==false && x.UserId == input.UserId && x.PostId == input.PostId);
-            if(alreadyLiked!=null) throw new Exception("Bu islem zaten yapilmis");
-            
-            var isUnliked = await _unlikeRepository.GetAll()
-                .Where(x => x.UserId == input.UserId && x.PostId == input.PostId)
-                .FirstOrDefaultAsync();
-
-            if (isUnliked != null)
+            var isExist = await _postVoteRepository.GetAll()
+                .FirstOrDefaultAsync(x =>
+                    x.IsDeleted == false && x.UserId == input.UserId && x.PostId == input.PostId);
+            if (isExist != null)
             {
-                isUnliked.IsDeleted = true;
-                await _unlikeRepository.UpdateAsync(isUnliked);
+                if (input.Value == 0)
+                {
+                    isExist.IsDeleted = true;
+                    await _postVoteRepository.UpdateAsync(isExist);
+                    return isExist;
+                }
+                isExist.Value = input.Value;
+                await _postVoteRepository.UpdateAsync(isExist);
+                return isExist;
             }
-            
-            var model = new PostLike
+            var model = new PostVote
             {
+                PostId = input.PostId,
                 UserId = input.UserId,
-                PostId = input.PostId
+                Value = input.Value
             };
-            await _postLikeRepository.AddAsync(model);
+            await _postVoteRepository.AddAsync(model);
             return model;
         }
         
-        public async Task ConvertLike(long id)
-        {
-            var result = await _postLikeRepository.GetByIdAsync(id);
-            if (result == null) throw new Exception("Boyle bir islem yok => "+id) ;
-            result.IsDeleted = true;
-            await _postLikeRepository.UpdateAsync(result);
-        }
-        
-        public async Task<Unlike> UnlikePost(CreateLikeDto input)
-        {
-            var alreadyUnliked = await _unlikeRepository.GetAll()
-                .FirstOrDefaultAsync(x => x.UserId == input.UserId && x.PostId == input.PostId);
-            if(alreadyUnliked!=null) throw new Exception("Bu islem zaten yapilmis");
-            
-            var isLiked = await _postLikeRepository.GetAll()
-                .Where(x => x.UserId == input.UserId && x.PostId == input.PostId)
-                .FirstOrDefaultAsync();
-
-            if (isLiked != null)
-            {
-                isLiked.IsDeleted = true;
-                await _postLikeRepository.UpdateAsync(isLiked);
-            }
-            
-            var model = new Unlike
-            {
-                UserId = input.UserId,
-                PostId = input.PostId
-            };
-            await _unlikeRepository.AddAsync(model);
-            
-            return model;
-        }
-
-        public async Task<Example> HomePosts(long userId)
+        public async Task<List<Example>> HomePosts(long userId)
         {
             var result = await  _communityUserRepository.GetAll().Where(x => x.UserId == userId)
                 .Include(x => x.Community).ThenInclude(x => x.Posts)
-                .ThenInclude(x=>x.Likes)
                 .Select(x => new Example
                 {
                     Data = x.Community.Posts.Select(p => new GetAllPostDto
@@ -275,10 +236,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         Content = p.Content,
                         ContentType = p.ContentType,
                         LinkUrl = p.LinkUrl,
+                        VoteCount = p.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - p.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
+                        UserPostVote = p.Votes.FirstOrDefault(l=>l.UserId==userId && l.IsDeleted==false && l.PostId==p.Id ),
                         MediaContentPath = BlobService.BlobService.GetImageUrl(p.MediaContentPath),
                         CreatedDateTime = p.CreatedDate,
-                        LikesCount = p.Likes.Count(l=>l.IsDeleted==false),
-                        IsLiked = p.Likes.FirstOrDefault(a=>a.UserId==userId && a.IsDeleted==false),
                         Community = new PostCommunityDto
                         {
                             Id = x.Community.Id,
@@ -292,7 +253,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         },
                         CommentsCount = p.Comments.Count
                     }).OrderByDescending(p=>p.Id).ToList()
-                }).FirstOrDefaultAsync();
+                }).ToListAsync();
             return result;
 
         }
@@ -300,7 +261,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         public async Task<List<GetAllPostDto>> UnauthorizedHomePosts()
         {
             var result = await _postRepository.GetAll().Where(x => x.IsDeleted == false)
-                .OrderByDescending(x=>x.Likes.Count)
                 .Include(x=>x.User)
                 .Include(x=>x.Community).Select(
                     x => new GetAllPostDto
@@ -308,12 +268,11 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         Id = x.Id,
                         Content = x.Content,
                         LinkUrl = x.LinkUrl,
+                        VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
                         MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                         ContentType = x.ContentType,
                         CreatedDateTime = x.CreatedDate,
                         CommentsCount = x.Comments.Count,
-                        LikesCount = x.Likes.Count(l=>l.IsDeleted==false),
-                        UnlikesCount = x.Unlikes.Count,
                         Community = new PostCommunityDto
                         {
                             Id = x.Community.Id,

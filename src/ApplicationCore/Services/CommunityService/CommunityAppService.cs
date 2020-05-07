@@ -82,9 +82,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     ContentType = x.ContentType,
                     CreatedDateTime = x.CreatedDate,
+                    VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
                     CommentsCount = x.Comments.Count,
-                    LikesCount = x.Likes.Count,
-                    UnlikesCount = x.Unlikes.Count,
                     User = new PostUserDto
                     {
                         Id = x.User.Id,

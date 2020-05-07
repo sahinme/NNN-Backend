@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Nnn.ApplicationCore.Entities.Likes;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
-using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
+using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
 using Microsoft.Nnn.ApplicationCore.Services.CommentService.Dto;
-using Microsoft.Nnn.ApplicationCore.Services.Dto;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
 {
@@ -14,11 +12,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public string Content { get; set; }
         public string ContentPath { get; set; }
         public ContentType ContentType { get; set; }
-        public PostLike IsLiked { get; set; }
         public string LinkUrl { get; set; }
         public DateTime CreatedDateTime { get; set; }
-        public long LikeCount { get; set; }
-        public long UnlikeCount { get; set; }
+        public long VoteCount { get; set; }
+        public PostVote UserPostVote { get; set; }
         public PostCommunityDto Community { get; set; }
         public PostUserDto UserInfo { get; set; }
         public List<CommentDto> Comments { get; set; }

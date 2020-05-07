@@ -58,7 +58,7 @@ namespace Microsoft.Nnn.Infrastructure.Services
                     }
 
                     // Note: only needed if the SMTP server requires authentication
-                    await client.AuthenticateAsync("iamfreeadmiral@gmail.com", "salopa44");
+                    await client.AuthenticateAsync("iamfreeadmiral@gmail.com", "Msnadresim123.,");
 
                     await client.SendAsync(mimeMessage);
 

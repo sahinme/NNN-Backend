@@ -310,6 +310,37 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.ToTable("Tags");
                 });
 
+            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostVotes.PostVote", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("CreatorUserId");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<string>("ModifiedBy");
+
+                    b.Property<DateTime>("ModifiedDate");
+
+                    b.Property<long>("PostId");
+
+                    b.Property<long>("UserId");
+
+                    b.Property<short>("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PostVotes");
+                });
+
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", b =>
                 {
                     b.Property<long>("Id")
@@ -555,6 +586,19 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.PostTags.Tag", "Tag")
                         .WithMany("Posts")
                         .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostVotes.PostVote", b =>
+                {
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
+                        .WithMany("Votes")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

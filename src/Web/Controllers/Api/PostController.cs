@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
 
@@ -57,25 +58,11 @@ namespace Microsoft.Nnn.Web.Controllers.Api
              await _postAppService.Delete(id);
             return Ok();
         }
-        
+
         [HttpPost]
-        public async Task<IActionResult> LikePost(CreateLikeDto input)
+        public async Task<IActionResult> Vote(CreateVoteDto input)
         {
-            var result =  await _postAppService.LikePost(input);
-            return Ok(result);
-        }
-        
-        [HttpDelete]
-        public async Task<IActionResult> ConvertLike(long id)
-        {
-            await _postAppService.ConvertLike(id);
-            return Ok();
-        }
-        
-        [HttpDelete]
-        public async Task<IActionResult> UnLikePost(CreateLikeDto input)
-        {
-            var result =  await _postAppService.UnlikePost(input);
+            var result = await _postAppService.Vote(input);
             return Ok(result);
         }
     }

@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using Microsoft.Nnn.ApplicationCore.Entities.Comments;
 using Microsoft.Nnn.ApplicationCore.Entities.Communities;
-using Microsoft.Nnn.ApplicationCore.Entities.Likes;
 using Microsoft.Nnn.ApplicationCore.Entities.PostTags;
-using Microsoft.Nnn.ApplicationCore.Entities.Unlikes;
+using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 
@@ -22,8 +21,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Posts
         public User User { get; set; }
         
         public virtual ICollection<Comment> Comments { get; set; }
-        public virtual ICollection<PostLike> Likes { get; set; }
-        public virtual ICollection<Unlike> Unlikes { get; set; }
+        public virtual ICollection<PostVote> Votes { get; set; }
         public virtual ICollection<PostTag> Tags { get; set; }
     }
 }
