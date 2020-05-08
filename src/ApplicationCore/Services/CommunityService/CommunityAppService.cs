@@ -104,7 +104,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     Id = x.Id,
                     Name = x.Name,
                     Description = x.Description,
-                    MemberCount = x.Users.Count,
+                    MemberCount = x.Users.Count(m=>m.IsDeleted==false),
                     LogoPath = x.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.LogoPath)
                 }).OrderByDescending(x=>x.MemberCount).Take(5).ToListAsync();
             return result;

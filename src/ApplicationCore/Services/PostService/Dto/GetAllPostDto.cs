@@ -2,9 +2,15 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
+using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
 
-namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
+namespace Microsoft.Nnn.ApplicationCore.Services.PostService.Dto
 {
+    public class Example
+    {
+        public List<GetAllPostDto> Posts { get; set; }
+    }
+
     public class GetAllPostDto
     {
         public long Id { get; set; }
@@ -19,10 +25,4 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
         public PostCommunityDto Community { get; set; }
         public PostUserDto User { get; set; }
     }
-
-    public class Example
-    {
-        public List<GetAllPostDto> Data { get; set; }
-    }
-    
 }

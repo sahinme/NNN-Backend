@@ -12,6 +12,7 @@ using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CommentService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.PostService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService.Dto;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.PostService
@@ -224,13 +225,13 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             return model;
         }
         
-        public async Task<List<Example>> HomePosts(long userId)
+        public async Task<List<GetAllPostDto>> HomePosts(long userId)
         {
-            var result = await  _communityUserRepository.GetAll().Where(x => x.UserId == userId)
+            var result = await  _communityUserRepository.GetAll().Where(x => x.UserId == userId && x.IsDeleted==false )
                 .Include(x => x.Community).ThenInclude(x => x.Posts)
                 .Select(x => new Example
                 {
-                    Data = x.Community.Posts.Select(p => new GetAllPostDto
+                    Posts = x.Community.Posts.Select(p => new GetAllPostDto
                     {
                         Id = p.Id,
                         Content = p.Content,
@@ -254,7 +255,16 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         CommentsCount = p.Comments.Count
                     }).OrderByDescending(p=>p.Id).ToList()
                 }).ToListAsync();
-            return result;
+            
+            var posts = new List<GetAllPostDto>();
+            foreach (var item in result)
+            {
+                foreach (var post in item.Posts)
+                {
+                    posts.Add(post);
+                }
+            }
+            return posts;
 
         }
 
