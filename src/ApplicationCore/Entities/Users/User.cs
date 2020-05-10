@@ -13,7 +13,6 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Users
         public string ProfileImagePath { get; set; }
         public char Gender { get; set; }
         [Required]
-        [MinLength(6)]
         public string Username { get; set; }
         [Required]
         [MinLength(6)]

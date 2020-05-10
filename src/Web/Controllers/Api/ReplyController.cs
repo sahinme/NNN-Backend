@@ -34,5 +34,12 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             await _replyAppService.Unlike(userId,replyId);
             return Ok();
         }
+        
+        [HttpDelete]
+        public async Task<IActionResult> Delete(long id)
+        {
+            await _replyAppService.Delete(id);
+            return Ok();
+        }
     }
 }

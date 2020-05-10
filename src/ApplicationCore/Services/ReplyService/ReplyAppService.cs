@@ -57,5 +57,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
             like.IsDeleted = true;
             await _likeRepository.UpdateAsync(like);
         }
+        
+        public async Task Delete(long id)
+        {
+            var comment = await _replyRepository.GetByIdAsync(id);
+            comment.IsDeleted = true;
+            await _replyRepository.UpdateAsync(comment);
+        }
     }
 }

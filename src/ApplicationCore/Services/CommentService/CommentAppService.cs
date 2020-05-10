@@ -84,9 +84,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
         public async Task<CommentLike> Like(long userId, long commentId)
         {
             var isExist = await _commentLikeRepository.GetAll()
-                .FirstOrDefaultAsync(x => x.UserId == userId && x.CommentId == commentId);
+                .FirstOrDefaultAsync(x => x.IsDeleted==false && x.UserId == userId && x.CommentId == commentId);
+            
             if (isExist != null)
-            {
+            { 
                 throw  new Exception("Bu islem daha once yapilmis");
             }
 
@@ -103,7 +104,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
         public async Task Unlike(long userId, long commentId)
         {
             var isExist = await _commentLikeRepository.GetAll()
-                .FirstOrDefaultAsync(x => x.UserId == userId && x.CommentId == commentId);
+                .FirstOrDefaultAsync(x => x.IsDeleted==false && x.UserId == userId && x.CommentId == commentId);
+            
             if (isExist == null)
             {
                 throw  new Exception("Boyle bir islem yok");

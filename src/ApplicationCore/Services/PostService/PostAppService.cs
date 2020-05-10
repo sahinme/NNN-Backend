@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Nnn.ApplicationCore.Entities.Comments;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.PostCategories;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
@@ -130,22 +131,26 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         UserName = x.User.Username,
                         ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath)
                     },
-                    Comments = x.Comments.Select(c => new CommentDto
+                    Comments = x.Comments.Where(c=>c.IsDeleted==false).Select(c => new CommentDto
                     {
                         Id = c.Id,
                         Content = c.Content,
+                        IsLoggedComment = c.UserId == userId,
+                        IsLoggedLiked = c.Likes.Any(w=>w.IsDeleted==false && w.UserId==userId),
                         CreatedDateTime = c.CreatedDate,
-                        LikeCount = c.Likes.Count,
+                        LikeCount = c.Likes.Count(l=>l.IsDeleted==false),
                         CommentUserInfo = new CommentUserDto
                         {
                             Id = c.User.Id,
                             UserName = c.User.Username,
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(c.User.ProfileImagePath)
                         },
-                        Replies = c.Replies.Select(r => new ReplyDto
+                        Replies = c.Replies.Where(r=>r.IsDeleted==false).Select(r => new ReplyDto
                         {
                             Id = r.Id,
                             Content = r.Content,
+                            IsLoggedReply = r.UserId==userId,
+                            IsLoggedLiked = r.Likes.Any(q=>q.IsDeleted==false && q.UserId==userId),
                             CreatedDateTime = r.CreatedDate,
                             LikeCount = r.Likes.Count,
                             ReplyUserInfo = new ReplyUserDto
@@ -252,7 +257,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath),
                             UserName = x.User.Username
                         },
-                        CommentsCount = p.Comments.Count
+                        CommentsCount = p.Comments.Count(c=>c.IsDeleted==false)
                     }).OrderByDescending(p=>p.Id).ToList()
                 }).ToListAsync();
             

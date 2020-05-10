@@ -28,8 +28,8 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             return Ok(result);
         }
         
-        [HttpGet]
-        public async Task<IActionResult> GetById(long id)
+        [HttpGet("by-id")]
+        public async Task<IActionResult> Get(long id)
         {
             var result = await _communityAppService.GetById(id);
             return Ok(result);

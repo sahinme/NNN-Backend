@@ -11,7 +11,9 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Replies
         public string Content { get; set; }
         public long UserId { get; set; }
         public long CommentId { get; set; }
+        public long? ParentId { get; set; }
         public User User { get; set; }
+        public Reply ParentReply { get; set; }
         public Comment Comment { get; set; }
         public virtual ICollection<ReplyLike> Likes { get; set; }
     }

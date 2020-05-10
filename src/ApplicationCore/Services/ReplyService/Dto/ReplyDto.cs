@@ -7,6 +7,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService.Dto
         public long Id { get; set; }
         public string Content { get; set; }
         public DateTime CreatedDateTime { get; set; }
+        public bool IsLoggedReply { get; set; }
+        public bool IsLoggedLiked { get; set; }
         public ReplyUserDto ReplyUserInfo { get; set; }
         public long LikeCount { get; set; }
     }

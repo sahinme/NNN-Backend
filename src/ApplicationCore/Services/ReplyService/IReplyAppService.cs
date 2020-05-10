@@ -11,5 +11,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
         Task<Reply> CreateReply(CreateReplyDto input);
         Task<ReplyLike> Like(long userId, long replyId);
         Task Unlike(long userId, long replyId);
+        Task Delete(long id);
     }
 }

@@ -31,6 +31,22 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
         
         public async Task<User> CreateUser(CreateUserDto input)
         {
+            var isUsernameTaken = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Username == input.Username);
+            if (isUsernameTaken != null)
+            {
+                var model = new User();
+                model.Username = "Bu kullanıcı adı daha önce alınmış";
+                return model;
+            }
+            
+            var isEmailTaken = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.EmailAddress == input.EmailAddress);
+            if (isEmailTaken != null)
+            {
+                var model = new User();
+                model.Username = "Bu e-post adresi daha önce alınmış";
+                return model;
+            }
+        
             var user = new User
             {
                 Username = input.Username,
