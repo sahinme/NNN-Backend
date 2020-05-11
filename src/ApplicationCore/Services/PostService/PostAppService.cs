@@ -60,7 +60,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             {
                 var path = await _blobService.InsertFile(input.ContentFile);
                 post.MediaContentPath = path;
-                post.ContentType = ContentType.Image;
             }
 
             if (input.ContentType == ContentType.Link)
@@ -68,40 +67,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 post.LinkUrl = input.LinkUrl;
             }
             await _postRepository.AddAsync(post);
-            
-//            foreach (var item in input.CategoryIds)
-//            {
-//                var result = new PostCategory
-//                {
-//                    CategoryId = item,
-//                    PostId = post.Id
-//                };
-//                await _postCategoryRepository.AddAsync(result);
-//            }
-//
-//            foreach (var tagItem in input.Tags)
-//            {
-//                var item = new PostTag();
-//                var isExist = await _tagRepository.GetAll().Where(x => String.Equals(x.Text, tagItem, StringComparison.CurrentCultureIgnoreCase))
-//                    .FirstOrDefaultAsync();
-//                if (isExist != null)
-//                {
-//                    item.PostId = post.Id;
-//                    item.TagId = isExist.Id;
-//                    await _postTagRepository.AddAsync(item);
-//                }
-//                else
-//                {
-//                    var newTag = new Tag
-//                    {
-//                        Text = tagItem
-//                    };
-//                    await _tagRepository.AddAsync(newTag);
-//                    item.PostId = post.Id;
-//                    item.TagId = newTag.Id;
-//                    await _postTagRepository.AddAsync(item);
-//                }
-//            }
+
             return post;
         }
 
@@ -204,7 +170,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         Id = x.Community.Id,
                         Name = x.Community.Name
                     }
-                }).ToListAsync();
+                }).OrderByDescending(x=>x.Id).ToListAsync();
             return result;
         }
 
