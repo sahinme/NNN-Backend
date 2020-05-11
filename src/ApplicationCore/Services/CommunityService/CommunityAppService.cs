@@ -76,12 +76,13 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     }).ToList()
                 }).FirstOrDefaultAsync();
 
-            var posts = await _postRepository.GetAll().Where(x => x.CommunityId == id)
+            var posts = await _postRepository.GetAll().Where(x => x.IsDeleted==false && x.CommunityId == id)
                 .Include(x => x.Comments).ThenInclude(x => x.Replies)
                 .Include(x => x.User).Select(x => new CommunityPostDto
                 {
                     Id = x.Id,
                     Content = x.Content,
+                    LinkUrl = x.LinkUrl,
                     MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     ContentType = x.ContentType,
                     CreatedDateTime = x.CreatedDate,

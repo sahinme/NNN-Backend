@@ -28,6 +28,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
                 UserId = input.UserId,
                 CommentId = input.CommentId
             };
+            if (input.ParentId != null)
+            {
+                reply.ParentId = input.ParentId;
+            }
             await _replyRepository.AddAsync(reply);
             return reply;
         }
@@ -52,7 +56,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
 
         public async Task Unlike(long userId, long replyId)
         {
-            var like = await _likeRepository.GetAll().Where(x => x.UserId == userId && x.ReplyId == replyId)
+            var like = await _likeRepository.GetAll().Where(x => x.UserId == userId && x.ReplyId == replyId && x.IsDeleted==false )
                 .FirstOrDefaultAsync();
             like.IsDeleted = true;
             await _likeRepository.UpdateAsync(like);

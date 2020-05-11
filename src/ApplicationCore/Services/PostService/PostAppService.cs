@@ -108,9 +108,9 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         public async Task<PostDto> GetPostById(long id,long? userId)
         {
             var post = await _postRepository.GetAll().Where(x => x.Id == id).Include(x => x.User)
-                .Include(x=>x.Comments).ThenInclude(x=>x.Replies).ThenInclude(x=>x.Likes)
+                .Include(x=>x.Comments).ThenInclude(x=>x.Replies).ThenInclude(x=>x.ParentReply)
+                .ThenInclude(x=>x.User)
                 .Include(x=>x.Comments).ThenInclude(x=>x.Likes)
-                .Include(x=>x.Tags).ThenInclude(x=>x.Tag)
                 .Select(x => new PostDto
                 {
                     Id = x.Id,
@@ -149,10 +149,15 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         {
                             Id = r.Id,
                             Content = r.Content,
+                            Parent = new ParentDto
+                            {
+                                ParentReplyUserName = r.ParentId != null ? r.ParentReply.User.Username : null,
+                                UserId = r.ParentId != null ? r.ParentReply.User.Id : (long?) null
+                            }  ,
                             IsLoggedReply = r.UserId==userId,
                             IsLoggedLiked = r.Likes.Any(q=>q.IsDeleted==false && q.UserId==userId),
                             CreatedDateTime = r.CreatedDate,
-                            LikeCount = r.Likes.Count,
+                            LikeCount = r.Likes.Count(l=>l.IsDeleted==false),
                             ReplyUserInfo = new ReplyUserDto
                             {
                                 Id = r.User.Id,
@@ -236,7 +241,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 .Include(x => x.Community).ThenInclude(x => x.Posts)
                 .Select(x => new Example
                 {
-                    Posts = x.Community.Posts.Select(p => new GetAllPostDto
+                    Posts = x.Community.Posts.Where(p=>p.IsDeleted==false).Select(p => new GetAllPostDto
                     {
                         Id = p.Id,
                         Content = p.Content,
@@ -253,9 +258,9 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         },
                         User = new PostUserDto
                         {    
-                            Id = x.User.Id,
-                            ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath),
-                            UserName = x.User.Username
+                            Id = p.User.Id,
+                            ProfileImagePath = BlobService.BlobService.GetImageUrl(p.User.ProfileImagePath),
+                            UserName = p.User.Username
                         },
                         CommentsCount = p.Comments.Count(c=>c.IsDeleted==false)
                     }).OrderByDescending(p=>p.Id).ToList()

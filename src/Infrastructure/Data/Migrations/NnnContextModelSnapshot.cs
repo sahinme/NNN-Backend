@@ -160,35 +160,6 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.ToTable("CommunityUsers");
                 });
 
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Likes.PostLike", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("CreatorUserId");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<string>("ModifiedBy");
-
-                    b.Property<DateTime>("ModifiedDate");
-
-                    b.Property<long>("PostId");
-
-                    b.Property<long>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PostLikes");
-                });
-
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Notifications.Notification", b =>
                 {
                     b.Property<long>("Id")
@@ -398,11 +369,15 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
+                    b.Property<long?>("ParentId");
+
                     b.Property<long>("UserId");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CommentId");
+
+                    b.HasIndex("ParentId");
 
                     b.HasIndex("UserId");
 
@@ -436,35 +411,6 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ReplyLikes");
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Unlikes.Unlike", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("CreatorUserId");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<string>("ModifiedBy");
-
-                    b.Property<DateTime>("ModifiedDate");
-
-                    b.Property<long>("PostId");
-
-                    b.Property<long>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Unlikes");
                 });
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Users.User", b =>
@@ -550,19 +496,6 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Likes.PostLike", b =>
-                {
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
-                        .WithMany("Likes")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostCategories.PostCategory", b =>
                 {
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Categories.Category", "Category")
@@ -622,6 +555,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .HasForeignKey("CommentId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Replies.Reply", "ParentReply")
+                        .WithMany()
+                        .HasForeignKey("ParentId");
+
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -633,19 +570,6 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Replies.Reply", "Reply")
                         .WithMany("Likes")
                         .HasForeignKey("ReplyId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Unlikes.Unlike", b =>
-                {
-                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
-                        .WithMany("Unlikes")
-                        .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")

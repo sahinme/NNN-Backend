@@ -5,5 +5,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService.Dto
         public string Content { get; set; }
         public long UserId { get; set; }
         public long CommentId { get; set; }
+        public long? ParentId { get; set; }
     }
 }
