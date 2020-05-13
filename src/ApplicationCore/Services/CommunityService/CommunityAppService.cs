@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,6 +41,11 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                 var path = await _blobService.InsertFile(input.LogoFile);
                 model.LogoPath = path;
             }
+            if (input.CoverImage != null)
+            {
+                var path = await _blobService.InsertFile(input.CoverImage);
+                model.CoverImagePath = path;
+            }
             await _communityRepository.AddAsync(model);
             return model;
         }
@@ -58,7 +64,70 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             return result;
         }
 
-        public async Task<CommunityDto> GetById(long id)
+        public async Task<Community> Update(UpdateCommunity input)
+        {
+            var isAdmin = await _communityUserRepository.GetAll()
+                .FirstOrDefaultAsync(x =>
+                    x.IsDeleted == false && x.IsAdmin && x.UserId == input.ModeratorId && x.CommunityId == input.Id);
+
+            if (isAdmin == null)
+            {
+                throw new Exception("Bu kullanıcının yetkisi yok");
+            }
+            
+            var community = await _communityRepository.GetByIdAsync(input.Id);
+            if (input.Name != null) community.Name = input.Name;
+            if (input.Description != null) community.Description = input.Description;
+            if (input.Logo != null)
+            {
+                var path = await _blobService.InsertFile(input.Logo);
+                community.LogoPath = path;
+            }
+            if (input.CoverPhoto != null)
+            {
+                var path = await _blobService.InsertFile(input.CoverPhoto);
+                community.CoverImagePath = path;
+            }
+
+            await _communityRepository.UpdateAsync(community);
+            return community;
+        }
+
+        public async Task<List<GetAllCommunityDto>> OfModerators(long userId)
+        {
+            var result = await _communityUserRepository.GetAll()
+                .Where(x => x.IsDeleted == false && x.IsAdmin && x.UserId == userId)
+                .Include(x => x.User).Include(x => x.Community).ThenInclude(x => x.Users)
+                .Select(x => new GetAllCommunityDto
+                {
+                    Id = x.Community.Id,
+                    Description = x.Community.Description,
+                    LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath),
+                    MemberCount = x.Community.Users.Count(m => m.IsDeleted == false),
+                    Name = x.Community.Name
+                }).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<CommunityUserDto>> Users(long id)
+        {
+            var result = await _communityRepository.GetAll().Where(x => x.Id == id && x.IsDeleted == false)
+                .Include(x => x.Users)
+                .ThenInclude(x => x.User).Select(x => new CommunityDto
+                {
+                    Members = x.Users.Where(m=>m.IsDeleted==false).Select(m => new CommunityUserDto
+                    {
+                        Id = m.User.Id,
+                        PostCount = m.User.Posts.Count(p=>p.IsDeleted==false),
+                        Username = m.User.Username,
+                        ProfileImg = BlobService.BlobService.GetImageUrl(m.User.ProfileImagePath)
+                    }).ToList()
+                }).FirstOrDefaultAsync();
+            var users = result.Members;
+            return users;
+        }
+
+        public async Task<CommunityDto> GetById(long id,long? userId)
         {
             var result = await _communityRepository.GetAll().Where(x => x.Id == id && x.IsDeleted == false)
                 .Include(x => x.Users)
@@ -68,6 +137,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     Name = x.Name,
                     Description = x.Description,
                     LogoPath = BlobService.BlobService.GetImageUrl(x.LogoPath),
+                    CoverImagePath = BlobService.BlobService.GetImageUrl(x.CoverImagePath),
+                    CreatedDate = x.CreatedDate,
+                    Moderators = x.Users.Where(q=>q.IsDeleted==false && q.Suspended==false && q.IsAdmin==true ).Select(q=>new CommunityUserDto
+                    {
+                        Id = q.User.Id,
+                        Username = q.User.Username,
+                        ProfileImg = BlobService.BlobService.GetImageUrl(q.User.ProfileImagePath)
+                    }).ToList(),
                     Members = x.Users.Where(m=>m.IsDeleted==false).Select(m => new CommunityUserDto
                     {
                         Id = m.User.Id,
@@ -86,6 +163,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     ContentType = x.ContentType,
                     CreatedDateTime = x.CreatedDate,
+                    UserPostVote = x.Votes.FirstOrDefault(p=>p.IsDeleted==false &&
+                                                             p.UserId == userId  && p.PostId==x.Id ),
                     VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
                     CommentsCount = x.Comments.Count,
                     User = new PostUserDto

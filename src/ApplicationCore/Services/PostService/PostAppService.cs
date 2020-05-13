@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Comments;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
+using Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations;
 using Microsoft.Nnn.ApplicationCore.Entities.PostCategories;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.PostTags;
@@ -22,28 +24,22 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
     {
         private readonly IAsyncRepository<Post> _postRepository;
         private readonly IAsyncRepository<PostVote> _postVoteRepository;
-        private readonly IAsyncRepository<User> _userRepository;
         private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
-        private readonly IAsyncRepository<PostCategory> _postCategoryRepository;
-        private readonly IAsyncRepository<Tag> _tagRepository;
-        private readonly IAsyncRepository<PostTag> _postTagRepository;
+        private readonly IAsyncRepository<ModeratorOperation> _moderatorOperationRepository;
         private readonly IBlobService _blobService;
 
         public PostAppService(IAsyncRepository<Post> postRepository,IAsyncRepository<PostCategory> postCategoryRepository,
             IAsyncRepository<PostTag> postTagRepository, IAsyncRepository<Tag> tagRepository,
             IBlobService blobService,
             IAsyncRepository<User> userRepository,IAsyncRepository<CommunityUser> communityUserRepository,
-            IAsyncRepository<PostVote> postVoteRepository)
+            IAsyncRepository<PostVote> postVoteRepository,
+            IAsyncRepository<ModeratorOperation> moderatorOperationRepository)
         {
             _postRepository = postRepository;
-            _postCategoryRepository = postCategoryRepository;
-            _postTagRepository = postTagRepository;
-            _tagRepository = tagRepository;
             _blobService = blobService;
-            _userRepository = userRepository;
             _communityUserRepository = communityUserRepository;
             _postVoteRepository = postVoteRepository;
-
+            _moderatorOperationRepository = moderatorOperationRepository;
         }
         
         public async Task<Post> CreatePost(CreatePostDto input)
@@ -146,6 +142,36 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             var post = await _postRepository.GetByIdAsync(id);
             post.IsDeleted = true;
             await _postRepository.UpdateAsync(post);
+        }
+
+        public async Task DeleteModerator(ModeratorDeleteDto input)
+        {
+            var isModerator = await _communityUserRepository.GetAll()
+                .FirstOrDefaultAsync(x =>
+                    x.IsDeleted == false && x.IsAdmin && x.UserId == input.ModeratorId &&
+                    x.CommunityId == input.CommunityId);
+            
+            if (isModerator == null)
+            {
+                throw new Exception("Bu kullanicinin yetkisi yok");
+            };
+
+            var post = await _postRepository.GetAll()
+                .FirstOrDefaultAsync(x => x.IsDeleted == false && x.Id == input.PostId);
+            if(post==null) throw new Exception("Post bulunamadi");
+            
+            post.IsDeleted = true;
+            await _postRepository.UpdateAsync(post);
+
+            var model = new ModeratorOperation
+            {
+                Operation = "POST_DELETED",
+                ModeratorId = input.ModeratorId,
+                CommunityId = input.CommunityId,
+                PostId = input.PostId
+            };
+            await _moderatorOperationRepository.AddAsync(model);
+
         }
 
         public async Task<List<UserPostsDto>> GetUserPosts(IdOrUsernameDto input)

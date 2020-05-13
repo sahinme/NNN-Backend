@@ -108,6 +108,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("CoverImagePath");
+
                     b.Property<DateTime>("CreatedDate");
 
                     b.Property<string>("CreatorUserId");
@@ -141,6 +143,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<string>("CreatorUserId");
 
+                    b.Property<bool>("IsAdmin");
+
                     b.Property<bool>("IsDeleted");
 
                     b.Property<string>("ModifiedBy");
@@ -158,6 +162,45 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("CommunityUsers");
+                });
+
+            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations.ModeratorOperation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("CommunityId");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("CreatorUserId");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<long>("ModeratorId");
+
+                    b.Property<string>("ModifiedBy");
+
+                    b.Property<DateTime>("ModifiedDate");
+
+                    b.Property<string>("Operation");
+
+                    b.Property<long?>("PostId");
+
+                    b.Property<long?>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommunityId");
+
+                    b.HasIndex("ModeratorId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ModeratorOperations");
                 });
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Notifications.Notification", b =>
@@ -494,6 +537,27 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .WithMany("Communities")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations.ModeratorOperation", b =>
+                {
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Communities.Community", "Community")
+                        .WithMany()
+                        .HasForeignKey("CommunityId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "Moderator")
+                        .WithMany()
+                        .HasForeignKey("ModeratorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId");
+
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostCategories.PostCategory", b =>

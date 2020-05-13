@@ -12,6 +12,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         Task<Post> CreatePost(CreatePostDto input);
         Task<PostDto> GetPostById(long id,long? userId);
         Task Delete(long id);
+        Task DeleteModerator(ModeratorDeleteDto input);
         Task<List<UserPostsDto>> GetUserPosts(IdOrUsernameDto input);
         Task<List<GetAllPostDto>> HomePosts(long userId);
         Task<List<GetAllPostDto>> UnauthorizedHomePosts();

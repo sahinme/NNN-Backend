@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
+using Microsoft.Nnn.ApplicationCore.Services.PostService.Dto;
 
 namespace Microsoft.Nnn.Web.Controllers.Api
 {
@@ -56,6 +57,13 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         public async Task<IActionResult> Delete(long id)
         {
              await _postAppService.Delete(id);
+            return Ok();
+        }
+        
+        [HttpDelete]
+        public async Task<IActionResult> ModeratorDelete(ModeratorDeleteDto input)
+        {
+            await _postAppService.DeleteModerator(input);
             return Ok();
         }
 

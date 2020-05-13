@@ -17,6 +17,7 @@ namespace Microsoft.Nnn.ApplicationCore.Interfaces
         Task DeleteUser(long id);
         Task<CommunityUser> JoinCommunity(long userId,long communityId);
         Task LeaveFromCommunity(long userId,long communityId);
+        Task ModeratorRejectedJoin(ModeratorRejected input);
         Task<List<GetAllCommunityDto>> GetUserCommunities(long userId);
         Task<bool> VerifyEmail(string verificationCode);
 

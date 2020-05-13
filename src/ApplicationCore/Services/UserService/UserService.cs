@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
+using Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
@@ -17,16 +18,19 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
     {
         private readonly IAsyncRepository<User> _userRepository;
         private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
+        private readonly IAsyncRepository<ModeratorOperation> _moderatorOperationRepository;
         private readonly IBlobService _blobService;
 
         public UserService(
             IAsyncRepository<User> userRepository,IBlobService blobService,
-            IAsyncRepository<CommunityUser> communityUserRepository
+            IAsyncRepository<CommunityUser> communityUserRepository,
+            IAsyncRepository<ModeratorOperation> moderatorOperationRepository
             )
         {
             _userRepository = userRepository;
             _blobService = blobService;
             _communityUserRepository = communityUserRepository;
+            _moderatorOperationRepository = moderatorOperationRepository;
         }
         
         public async Task<User> CreateUser(CreateUserDto input)
@@ -91,6 +95,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 Gender = x.Gender,
                 ProfileImagePath = x.ProfileImagePath == null ? null : BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
             }).FirstOrDefaultAsync();
+
+            var isModerator = await _communityUserRepository.GetAll().AnyAsync(x =>
+                x.IsDeleted == false && x.Suspended == false && x.IsAdmin && x.UserId == user.Id);
+            user.IsModerator = isModerator;
             return user;    
         }
 
@@ -172,6 +180,25 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             await _communityUserRepository.UpdateAsync(isExist);
         }
         
+        public async Task ModeratorRejectedJoin(ModeratorRejected input)
+        {
+            var isExist = await _communityUserRepository.GetAll()
+                .Where(x => x.CommunityId == input.CommunityId && x.UserId == input.UserId && x.IsDeleted == false )
+                .FirstOrDefaultAsync();
+            if (isExist == null) throw new Exception("this relation don`t exist");
+            isExist.IsDeleted = true;
+            await _communityUserRepository.UpdateAsync(isExist);
+
+            var model = new ModeratorOperation
+            {
+                Operation = "USER_REJECTED",
+                CommunityId = input.CommunityId,
+                ModeratorId = input.ModeratorId,
+                UserId = input.UserId
+            };
+            await _moderatorOperationRepository.AddAsync(model);
+        }
+        
         public async Task<List<GetAllCommunityDto>> GetUserCommunities(long userId)
         {
             var result = await _communityUserRepository.GetAll()
@@ -182,7 +209,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                     Name = x.Community.Name,
                     Description = x.Community.Description,
                     LogoPath = x.Community.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.Community.LogoPath),
-                    MemberCount = x.Community.Users.Count
+                    MemberCount = x.Community.Users.Count(m=>m.IsDeleted==false)
                 }).ToListAsync();
             return result;
         }

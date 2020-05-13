@@ -9,7 +9,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
     {
         Task<Community> CreateCommunity(CreateCommunity input);
         Task<List<GetAllCommunityDto>> GetAll();
-        Task<CommunityDto> GetById(long id);
+        Task<Community> Update(UpdateCommunity input);
+        Task<CommunityDto> GetById(long id,long? userId);
         Task<List<GetAllCommunityDto>> GetPopulars(long? userId);
+        Task<List<GetAllCommunityDto>> OfModerators(long userId);
+        Task<List<CommunityUserDto>> Users(long id);
     }
 }

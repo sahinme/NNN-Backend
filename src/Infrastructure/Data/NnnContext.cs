@@ -3,6 +3,7 @@ using Microsoft.Nnn.ApplicationCore.Entities.CommentLikes;
 using Microsoft.Nnn.ApplicationCore.Entities.Comments;
 using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
+using Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations;
 using Microsoft.Nnn.ApplicationCore.Entities.Notifications;
 using Microsoft.Nnn.ApplicationCore.Entities.PostCategories;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
@@ -13,7 +14,7 @@ using Microsoft.Nnn.ApplicationCore.Entities.Users;
 
 namespace Microsoft.Nnn.Infrastructure.Data
 {
-    //dotnet ef migrations add parent_reply --context NnnContext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
+    //dotnet ef migrations add commmmm --context NnnContext -p ../Infrastructure/Infrastructure.csproj -s Web.csproj -o Data/Migrations
     public class NnnContext : DbContext
     {
         public NnnContext(DbContextOptions<NnnContext> options) : base(options)
@@ -25,6 +26,7 @@ namespace Microsoft.Nnn.Infrastructure.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<PostVote> PostVotes { get; set; }
         public DbSet<CommentLike> CommentLikes { get; set; }
+        public DbSet<ModeratorOperation> ModeratorOperations { get; set; }
         public DbSet<ReplyLike> ReplyLikes { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<PostTag> PostTags { get; set; }

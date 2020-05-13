@@ -9,6 +9,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers
     {
         public long UserId { get; set; }
         public long CommunityId { get; set; }
+        public bool IsAdmin { get; set; }
         
         [DefaultValue(false)]
         public bool Suspended { get; set; }

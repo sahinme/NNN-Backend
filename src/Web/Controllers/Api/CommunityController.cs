@@ -28,10 +28,17 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             return Ok(result);
         }
         
-        [HttpGet("by-id")]
-        public async Task<IActionResult> Get(long id)
+        [HttpGet]
+        public async Task<IActionResult> OfModerators(long userId)
         {
-            var result = await _communityAppService.GetById(id);
+            var result = await _communityAppService.OfModerators(userId);
+            return Ok(result);
+        }
+        
+        [HttpGet("by-id")]
+        public async Task<IActionResult> Get(long id,long userId)
+        {
+            var result = await _communityAppService.GetById(id,userId);
             return Ok(result);
         }
         
@@ -39,6 +46,20 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         public async Task<IActionResult> GetPopulars(long userId)
         {
             var result = await _communityAppService.GetPopulars(userId);
+            return Ok(result);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> Users(long id)
+        {
+            var result = await _communityAppService.Users(id);
+            return Ok(result);
+        }
+        
+        [HttpPut]
+        public async Task<IActionResult> Update([FromForm] UpdateCommunity input)
+        {
+            var result = await _communityAppService.Update(input);
             return Ok(result);
         }
 

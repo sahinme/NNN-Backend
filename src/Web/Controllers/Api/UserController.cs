@@ -80,6 +80,13 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             return Ok();
         }
 
+        [HttpDelete]
+        public async Task<IActionResult> ModeratorRejectedJoin(ModeratorRejected input)
+        {
+            await _userService.ModeratorRejectedJoin(input);
+            return Ok();
+        }
+        
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto input)
         {
