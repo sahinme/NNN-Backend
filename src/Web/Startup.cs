@@ -74,14 +74,17 @@ namespace Microsoft.Nnn.Web
 
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
-                builder.WithOrigins("http://localhost:3000/");
+                builder.WithOrigins("http://localhost:3000/","http://saalla.com/");
                 builder.AllowAnyMethod();
                 builder.AllowAnyHeader();
                 builder.SetIsOriginAllowed((host) => true);
                 builder.AllowCredentials();
             }));
             
-            services.AddSignalR();
+            services.AddSignalR(options => 
+            { 
+                options.EnableDetailedErrors = true; 
+            }); 
 
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
@@ -203,6 +206,8 @@ namespace Microsoft.Nnn.Web
             {
                 routes.MapHub<ChatHub>("/chat");
             });
+            
+            
             
             app.UseIdentity();
 
