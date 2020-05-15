@@ -26,6 +26,7 @@ using Microsoft.Nnn.ApplicationCore.Entities.EmailSettings;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
+using Microsoft.Nnn.ApplicationCore.Services.CategoryService;
 using Microsoft.Nnn.ApplicationCore.Services.CommentService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
@@ -73,17 +74,21 @@ namespace Microsoft.Nnn.Web
 
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
-                builder.AllowAnyOrigin();
+                builder.WithOrigins("http://localhost:3000/");
                 builder.AllowAnyMethod();
                 builder.AllowAnyHeader();
+                builder.SetIsOriginAllowed((host) => true);
                 builder.AllowCredentials();
             }));
+            
+            services.AddSignalR();
 
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
             services.AddScoped<IPostAppService, PostAppService>();
             services.AddScoped<ICommentAppService, CommentAppService>();
             services.AddScoped<IReplyAppService, ReplyAppService>();
+            services.AddScoped<ICategoryAppService, CategoryAppService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICommunityAppService, CommunityAppService>();
             services.AddScoped<IBlobService, BlobService>();
@@ -111,6 +116,7 @@ namespace Microsoft.Nnn.Web
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SigningKey"])),
                     };
                 });
+            
             
             // configure token generation
             services.AddIdentity<IdentityUser, IdentityRole>()
@@ -191,12 +197,12 @@ namespace Microsoft.Nnn.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseCors(
-                builder => builder
-                    .AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials());
+            app.UseCors("MyPolicy");
+            
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ChatHub>("/chat");
+            });
             
             app.UseIdentity();
 
@@ -232,6 +238,8 @@ namespace Microsoft.Nnn.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            
+            
             
             app.UseHttpsRedirection();
             app.UseStaticFiles();

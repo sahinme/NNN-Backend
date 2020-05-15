@@ -34,7 +34,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             var model = new Community
             {
                 Name = input.Name,
-                Description = input.Description
+                Description = input.Description,
+                CategoryId = input.CategoryId
             };
             if (input.LogoFile != null)
             {

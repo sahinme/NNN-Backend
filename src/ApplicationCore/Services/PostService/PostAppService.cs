@@ -85,7 +85,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     Community = new PostCommunityDto
                     {
                         Id = x.Community.Id,
-                        Name = x.Community.Name
+                        Name = x.Community.Name,
+                        LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                     },
                     UserInfo = new PostUserDto
                     {
@@ -194,7 +195,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     Community = new PostCommunityDto
                     {
                         Id = x.Community.Id,
-                        Name = x.Community.Name
+                        Name = x.Community.Name,
+                        LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                     }
                 }).OrderByDescending(x=>x.Id).ToListAsync();
             return result;
@@ -246,7 +248,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         Community = new PostCommunityDto
                         {
                             Id = x.Community.Id,
-                            Name = x.Community.Name
+                            Name = x.Community.Name,
+                            LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                         },
                         User = new PostUserDto
                         {    
@@ -288,7 +291,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         Community = new PostCommunityDto
                         {
                             Id = x.Community.Id,
-                            Name = x.Community.Name
+                            Name = x.Community.Name,
+                            LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                         },
                         User = new PostUserDto
                         {

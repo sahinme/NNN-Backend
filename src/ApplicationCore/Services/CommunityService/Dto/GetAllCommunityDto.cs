@@ -1,3 +1,5 @@
+using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
+
 namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
 {
     public class GetAllCommunityDto
@@ -8,5 +10,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
         public string LogoPath { get; set; }
         public int MemberCount { get; set; }
         public bool IsUserJoined { get; set; }
+        public CategoryDto Category { get; set; }
     }
 }
