@@ -29,6 +29,8 @@ using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CategoryService;
 using Microsoft.Nnn.ApplicationCore.Services.CommentService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService;
+using Microsoft.Nnn.ApplicationCore.Services.ConversationService;
+using Microsoft.Nnn.ApplicationCore.Services.MessageService;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService;
 using Microsoft.Nnn.ApplicationCore.Services.UserService;
@@ -74,7 +76,7 @@ namespace Microsoft.Nnn.Web
 
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
-                builder.WithOrigins("http://localhost:3000/","http://saalla.com/");
+                builder.WithOrigins("http://localhost:3000/","http://saalla.com/","https://saalla.com/");
                 builder.AllowAnyMethod();
                 builder.AllowAnyHeader();
                 builder.SetIsOriginAllowed((host) => true);
@@ -93,6 +95,8 @@ namespace Microsoft.Nnn.Web
             services.AddScoped<IReplyAppService, ReplyAppService>();
             services.AddScoped<ICategoryAppService, CategoryAppService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IConversationAppService, ConversationAppService>();
+            services.AddScoped<IMessageAppService, MessageAppService>();
             services.AddScoped<ICommunityAppService, CommunityAppService>();
             services.AddScoped<IBlobService, BlobService>();
             services.Configure<CatalogSettings>(Configuration);
