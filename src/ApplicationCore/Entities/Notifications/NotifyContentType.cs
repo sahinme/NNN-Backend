@@ -2,8 +2,12 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Notifications
 {
     public enum NotifyContentType
     {
-        RemoveSubscribe=30,
-        SubscribeRequest=10,
-        SubscribeResponse=20
+        PostComment=10,
+        CommentReply=20,
+        ReplyReply = 30,
+        PostVote=40,
+        CommentLike=50,
+        ReplyLike=60,
+        Message=70
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Comments;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations;
+using Microsoft.Nnn.ApplicationCore.Entities.Notifications;
 using Microsoft.Nnn.ApplicationCore.Entities.PostCategories;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.PostTags;
@@ -26,20 +27,22 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         private readonly IAsyncRepository<PostVote> _postVoteRepository;
         private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
         private readonly IAsyncRepository<ModeratorOperation> _moderatorOperationRepository;
+        private readonly IAsyncRepository<Notification> _notificationRepository;
         private readonly IBlobService _blobService;
 
-        public PostAppService(IAsyncRepository<Post> postRepository,IAsyncRepository<PostCategory> postCategoryRepository,
-            IAsyncRepository<PostTag> postTagRepository, IAsyncRepository<Tag> tagRepository,
+        public PostAppService(IAsyncRepository<Post> postRepository, 
             IBlobService blobService,
-            IAsyncRepository<User> userRepository,IAsyncRepository<CommunityUser> communityUserRepository,
+           IAsyncRepository<CommunityUser> communityUserRepository,
             IAsyncRepository<PostVote> postVoteRepository,
-            IAsyncRepository<ModeratorOperation> moderatorOperationRepository)
+            IAsyncRepository<ModeratorOperation> moderatorOperationRepository,
+            IAsyncRepository<Notification> notificationRepository)
         {
             _postRepository = postRepository;
             _blobService = blobService;
             _communityUserRepository = communityUserRepository;
             _postVoteRepository = postVoteRepository;
             _moderatorOperationRepository = moderatorOperationRepository;
+            _notificationRepository = notificationRepository;
         }
         
         public async Task<Post> CreatePost(CreatePostDto input)

@@ -14,25 +14,15 @@ namespace Microsoft.Nnn.ApplicationCore.Services.NotificationService
         {
             _notificationRepository = notificationRepository;
         }
-        public async Task CreateNotify(CreateNotificationDto input)
-        {
-            var notify = new Notification
-            {
-                OwnerId = input.OwnerId,
-                SenderId = input.SenderId,
-                Title = input.Title,
-                ContentId = input.ContentId,
-                Content = input.Content,
-            };
-            await _notificationRepository.AddAsync(notify);
-        }
 
-        public async Task<bool> MarkAsRead(long id)
-        {
-            var notify = await _notificationRepository.GetByIdAsync(id);
-            notify.IsRead = true;
-            await _notificationRepository.UpdateAsync(notify);
-            return true;
-        }
+//        public async Task<Notification> Create(CreateNotificationDto input)
+//        {
+//            switch (input.Type)
+//            {
+//                case NotifyContentType.PostVote:
+//                    
+//                    
+//            }
+//        }
     }
 }
