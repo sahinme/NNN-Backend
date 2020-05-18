@@ -1,5 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Notifications;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.NotificationService.Dto;
@@ -15,14 +18,38 @@ namespace Microsoft.Nnn.ApplicationCore.Services.NotificationService
             _notificationRepository = notificationRepository;
         }
 
-//        public async Task<Notification> Create(CreateNotificationDto input)
-//        {
-//            switch (input.Type)
-//            {
-//                case NotifyContentType.PostVote:
-//                    
-//                    
-//            }
-//        }
+        public async Task<List<NotificationDto>> GetUserNotifications(long userId)
+        {
+            var result = await _notificationRepository.GetAll()
+                .Where(x => x.IsDeleted == false && x.OwnerUserId == userId)
+                .Select(x => new NotificationDto
+                {
+                    Id = x.Id,
+                    Content = x.Content,
+                    TargetId = x.TargetId,
+                    TargetName = x.TargetName,
+                    IsRead = x.IsRead,
+                    ImgPath = BlobService.BlobService.GetImageUrl(x.ImgPath),
+                    Type = x.Type,
+                }).ToListAsync();
+            return result;
+        }
+
+        public async Task<long> GetUnReads(long userId)
+        {
+            var result = await _notificationRepository.GetAll()
+                .Where(x => x.IsDeleted == false && x.OwnerUserId == userId && x.IsRead == false).CountAsync();
+            return result;
+        }
+
+        public async Task MarkAsRead(long[] ids)
+        {
+            foreach (var id in ids)
+            {
+                var notification = await _notificationRepository.GetByIdAsync(id);
+                notification.IsRead = true;
+                await _notificationRepository.UpdateAsync(notification);
+            }
+        }
     }
 }

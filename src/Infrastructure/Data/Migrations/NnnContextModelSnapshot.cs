@@ -190,6 +190,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
+
                     b.ToTable("Conversations");
                 });
 
@@ -222,6 +226,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ConversationId");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
                 });
@@ -273,11 +281,11 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<string>("Content");
 
-                    b.Property<long>("ContentId");
-
                     b.Property<DateTime>("CreatedDate");
 
                     b.Property<string>("CreatorUserId");
+
+                    b.Property<string>("ImgPath");
 
                     b.Property<bool>("IsDeleted");
 
@@ -287,17 +295,13 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<int>("NotifyContentType");
+                    b.Property<long>("OwnerUserId");
 
-                    b.Property<long>("OwnerId");
+                    b.Property<long>("TargetId");
 
-                    b.Property<int>("OwnerType");
+                    b.Property<string>("TargetName");
 
-                    b.Property<long>("SenderId");
-
-                    b.Property<int>("SenderType");
-
-                    b.Property<string>("Title");
+                    b.Property<int>("Type");
 
                     b.HasKey("Id");
 
@@ -609,11 +613,34 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Conversations.Conversation", b =>
+                {
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Messages.Message", b =>
                 {
                     b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Conversations.Conversation", "Conversation")
                         .WithMany("Messages")
                         .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Microsoft.Nnn.ApplicationCore.Entities.Users.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

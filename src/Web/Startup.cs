@@ -31,6 +31,7 @@ using Microsoft.Nnn.ApplicationCore.Services.CommentService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService;
 using Microsoft.Nnn.ApplicationCore.Services.ConversationService;
 using Microsoft.Nnn.ApplicationCore.Services.MessageService;
+using Microsoft.Nnn.ApplicationCore.Services.NotificationService;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService;
 using Microsoft.Nnn.ApplicationCore.Services.UserService;
@@ -96,6 +97,7 @@ namespace Microsoft.Nnn.Web
             services.AddScoped<ICategoryAppService, CategoryAppService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConversationAppService, ConversationAppService>();
+            services.AddScoped<INotificationAppService, NotificationAppService>();
             services.AddScoped<IMessageAppService, MessageAppService>();
             services.AddScoped<ICommunityAppService, CommunityAppService>();
             services.AddScoped<IBlobService, BlobService>();

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Comments;
+using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations;
 using Microsoft.Nnn.ApplicationCore.Entities.Notifications;
@@ -27,15 +28,19 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         private readonly IAsyncRepository<PostVote> _postVoteRepository;
         private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
         private readonly IAsyncRepository<ModeratorOperation> _moderatorOperationRepository;
+        private readonly IAsyncRepository<User> _userRepository;
         private readonly IAsyncRepository<Notification> _notificationRepository;
         private readonly IBlobService _blobService;
+        private readonly IAsyncRepository<Community> _communityRepository;
 
         public PostAppService(IAsyncRepository<Post> postRepository, 
             IBlobService blobService,
            IAsyncRepository<CommunityUser> communityUserRepository,
+            IAsyncRepository<Community> communityRepository,
             IAsyncRepository<PostVote> postVoteRepository,
             IAsyncRepository<ModeratorOperation> moderatorOperationRepository,
-            IAsyncRepository<Notification> notificationRepository)
+            IAsyncRepository<Notification> notificationRepository,
+            IAsyncRepository<User> userRepository)
         {
             _postRepository = postRepository;
             _blobService = blobService;
@@ -43,6 +48,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             _postVoteRepository = postVoteRepository;
             _moderatorOperationRepository = moderatorOperationRepository;
             _notificationRepository = notificationRepository;
+            _userRepository = userRepository;
+            _communityRepository = communityRepository;
         }
         
         public async Task<Post> CreatePost(CreatePostDto input)
@@ -229,6 +236,22 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 Value = input.Value
             };
             await _postVoteRepository.AddAsync(model);
+
+            // notificaiton
+            var user = await _userRepository.GetByIdAsync(input.UserId);
+            var post = await _postRepository.GetByIdAsync(input.PostId);
+            var community = await _communityRepository.GetByIdAsync(post.CommunityId);
+            if (post.UserId == user.Id) return model;
+            var notify = new Notification
+            {
+                TargetId = input.PostId,
+                OwnerUserId = post.UserId,
+                TargetName = community.Name,
+                Type = NotifyContentType.PostVote,
+                Content = user.Username + " " + "sallamanı oyladı",
+                ImgPath = user.ProfileImagePath
+            };
+            await _notificationRepository.AddAsync(notify);
             return model;
         }
         

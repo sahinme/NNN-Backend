@@ -14,18 +14,25 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             _notificationAppService = notificationAppService;
         }
         
-//        [HttpPost]
-//        public async Task<IActionResult> CreateNotify(CreateNotificationDto input)
-//        {
-//            await _notificationAppService.CreateNotify(input);
-//            return Ok();
-//        }
-//        
-//        [HttpPut]
-//        public async Task<IActionResult> MarkAsRead(long id)
-//        {
-//            var result = await _notificationAppService.MarkAsRead(id);
-//            return Ok(result);
-//        }
+        [HttpGet]
+        public async Task<IActionResult> GetUser(long userId)
+        {
+            var result = await _notificationAppService.GetUserNotifications(userId);
+            return Ok(result);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetCount(long userId)
+        {
+            var result = await _notificationAppService.GetUnReads(userId);
+            return Ok(new { count=result });
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> MarkAsRead(long[] ids)
+        {
+            await _notificationAppService.MarkAsRead(ids);
+            return Ok();
+        }
     }
 }
