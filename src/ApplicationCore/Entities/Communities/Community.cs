@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Nnn.ApplicationCore.Entities.Categories;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
@@ -13,7 +14,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Communities
         public string Description { get; set; }
         public string LogoPath { get; set; }
         public string CoverImagePath { get; set; }
-        public long CategoryId { get; set; }
+        public Guid CategoryId { get; set; }
         public Category  Category { get; set; }
         public virtual ICollection<CommunityUser> Users { get; set; }
         public virtual ICollection<Post> Posts { get; set; }

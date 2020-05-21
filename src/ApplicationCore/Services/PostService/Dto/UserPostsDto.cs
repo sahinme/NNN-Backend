@@ -6,7 +6,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
 {
     public class UserPostsDto
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
         public string Content { get; set; }
         public string MediaContentPath { get; set; }
         public string LinkUrl { get; set; }
@@ -20,7 +20,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
 
     public class PostCommunityDto
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string LogoPath { get; set; }
     }

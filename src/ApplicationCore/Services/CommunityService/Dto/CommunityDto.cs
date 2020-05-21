@@ -8,7 +8,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
 {
     public class CommunityDto
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime CreatedDate { get; set; }
@@ -23,7 +23,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
 
     public class CommunityUserDto    
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
         public string Username { get; set; }
         public string ProfileImg { get; set; }
         public long PostCount { get; set; }

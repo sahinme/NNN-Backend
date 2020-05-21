@@ -6,7 +6,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService.Dto
 {
     public class CommentDto
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public string Content { get; set; }
         public bool IsLoggedComment { get; set; }
@@ -18,7 +18,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService.Dto
 
     public class CommentUserDto
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
         public string UserName { get; set; }
         public string ProfileImagePath { get; set; }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
@@ -10,11 +11,11 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
     public interface IPostAppService
     {
         Task<Post> CreatePost(CreatePostDto input);
-        Task<PostDto> GetPostById(long id,long? userId);
-        Task Delete(long id);
+        Task<PostDto> GetPostById(Guid id,Guid? userId);
+        Task Delete(Guid id);
         Task DeleteModerator(ModeratorDeleteDto input);
         Task<List<UserPostsDto>> GetUserPosts(IdOrUsernameDto input);
-        Task<List<GetAllPostDto>> HomePosts(long userId);
+        Task<List<GetAllPostDto>> HomePosts(Guid userId);
         Task<List<GetAllPostDto>> UnauthorizedHomePosts();
         Task<PostVote> Vote(CreateVoteDto input);
     }

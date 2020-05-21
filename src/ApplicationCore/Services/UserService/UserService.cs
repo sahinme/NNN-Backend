@@ -70,7 +70,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             return user;
         }
 
-        public async Task<UserDto> GetUserById(int id)
+        public async Task<UserDto> GetUserById(Guid id)
         {
             var user = await _userRepository.GetAll().Where(x => x.Id == id).Select(x => new UserDto
             {
@@ -145,14 +145,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             return decodedPassword;
         }
 
-        public async Task DeleteUser(long id)
+        public async Task DeleteUser(Guid id)
         {
             var user = await _userRepository.GetByIdAsync(id);
             user.IsDeleted = true;
             await _userRepository.UpdateAsync(user);
         }
 
-        public async Task<CommunityUser> JoinCommunity(long userId, long communityId)
+        public async Task<CommunityUser> JoinCommunity(Guid userId, Guid communityId)
         {
             var isExist = await _communityUserRepository.GetAll()
                 .Where(x => x.IsDeleted == false && x.UserId==userId && x.CommunityId==communityId )
@@ -170,7 +170,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             return model;
         }
         
-        public async Task LeaveFromCommunity(long userId, long communityId)
+        public async Task LeaveFromCommunity(Guid userId, Guid communityId)
         {
             var isExist = await _communityUserRepository.GetAll()
                 .Where(x => x.CommunityId == communityId && x.UserId == userId && x.IsDeleted == false )
@@ -199,7 +199,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             await _moderatorOperationRepository.AddAsync(model);
         }
         
-        public async Task<List<GetAllCommunityDto>> GetUserCommunities(long userId)
+        public async Task<List<GetAllCommunityDto>> GetUserCommunities(Guid userId)
         {
             var result = await _communityUserRepository.GetAll()
                 .Where(x => x.UserId == userId && x.IsDeleted == false && x.Suspended == false)
@@ -213,7 +213,5 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 }).ToListAsync();
             return result;
         }
-        
-        
     }
 }

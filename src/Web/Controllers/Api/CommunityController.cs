@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService;
@@ -29,28 +30,28 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> OfModerators(long userId)
+        public async Task<IActionResult> OfModerators(Guid userId)
         {
             var result = await _communityAppService.OfModerators(userId);
             return Ok(result);
         }
         
         [HttpGet("by-id")]
-        public async Task<IActionResult> Get(long id,long userId)
+        public async Task<IActionResult> Get(Guid id,Guid userId)
         {
             var result = await _communityAppService.GetById(id,userId);
             return Ok(result);
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetPopulars(long userId)
+        public async Task<IActionResult> GetPopulars(Guid userId)
         {
             var result = await _communityAppService.GetPopulars(userId);
             return Ok(result);
         }
         
         [HttpGet]
-        public async Task<IActionResult> Users(long id)
+        public async Task<IActionResult> Users(Guid id)
         {
             var result = await _communityAppService.Users(id);
             return Ok(result);

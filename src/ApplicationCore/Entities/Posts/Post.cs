@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Nnn.ApplicationCore.Entities.Comments;
 using Microsoft.Nnn.ApplicationCore.Entities.Communities;
@@ -13,8 +14,8 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Posts
         public string Content { get; set; }
         public string MediaContentPath { get; set; }
         public ContentType ContentType { get; set; }
-        public long UserId { get; set; }
-        public long CommunityId { get; set; }
+        public Guid UserId { get; set; }
+        public Guid CommunityId { get; set; }
         public string LinkUrl { get; set; }
         
         public Community Community { get; set; } 

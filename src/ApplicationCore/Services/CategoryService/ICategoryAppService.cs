@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Nnn.ApplicationCore.Entities.Categories;
@@ -10,6 +11,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CategoryService
     {
         Task<Category> CreateCategory(CreateCategoryDto input);
         Task<List<CategoryDto>> GetAllCategories();
-        Task<List<GetAllCommunityDto>> GetCommunitiesByCategory(long categoryId,long? userId);
+        Task<List<GetAllCommunityDto>> GetCommunitiesByCategory(Guid categoryId,Guid? userId);
     }
 }

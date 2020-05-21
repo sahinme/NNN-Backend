@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
@@ -7,8 +8,8 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers
 {
     public class CommunityUser:BaseEntity,IAggregateRoot
     {
-        public long UserId { get; set; }
-        public long CommunityId { get; set; }
+        public Guid UserId { get; set; }
+        public Guid CommunityId { get; set; }
         public bool IsAdmin { get; set; }
         
         [DefaultValue(false)]

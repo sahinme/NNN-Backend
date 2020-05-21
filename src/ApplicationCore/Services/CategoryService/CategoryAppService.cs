@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,7 +42,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CategoryService
             return result;
         }
 
-        public async Task<List<GetAllCommunityDto>> GetCommunitiesByCategory(long categoryId,long? userId)
+        public async Task<List<GetAllCommunityDto>> GetCommunitiesByCategory(Guid categoryId,Guid? userId)
         {
             var communities = await _communityRepository.GetAll()
                 .Where(x => x.IsDeleted == false && x.CategoryId == categoryId)

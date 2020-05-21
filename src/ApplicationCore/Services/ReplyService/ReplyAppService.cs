@@ -71,7 +71,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
             return reply;
         }
 
-        public async Task<ReplyLike> Like(long userId, long replyId)
+        public async Task<ReplyLike> Like(Guid userId, Guid replyId)
         {
             var isExist = await _likeRepository.GetAll().Where(x => x.UserId == userId && x.ReplyId == replyId && x.IsDeleted==false)
                 .FirstOrDefaultAsync();
@@ -107,7 +107,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
             return model;
         }
 
-        public async Task Unlike(long userId, long replyId)
+        public async Task Unlike(Guid userId, Guid replyId)
         {
             var like = await _likeRepository.GetAll().Where(x => x.UserId == userId && x.ReplyId == replyId && x.IsDeleted==false )
                 .FirstOrDefaultAsync();
@@ -115,7 +115,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
             await _likeRepository.UpdateAsync(like);
         }
         
-        public async Task Delete(long id)
+        public async Task Delete(Guid id)
         {
             var comment = await _replyRepository.GetByIdAsync(id);
             comment.IsDeleted = true;

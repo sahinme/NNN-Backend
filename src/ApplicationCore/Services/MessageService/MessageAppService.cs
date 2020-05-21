@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Conversations;
@@ -26,7 +27,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.MessageService
         public async Task<Message> Create(CreateMessageDto input)
         {
           
-            if (input.ConversationId == 0)
+            if (input.ConversationId == Guid.Empty)
             {
                var conversation = await _conversationAppService.Create(new CreateConversationDto
                     {ReceiverId = input.ReceiverId, SenderId = input.SenderId});

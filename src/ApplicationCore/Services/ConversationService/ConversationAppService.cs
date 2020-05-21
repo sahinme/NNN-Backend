@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,7 +30,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ConversationService
             return model;
         }
 
-        public async Task<List<ConversationDto>> GetAll(long userId)
+        public async Task<List<ConversationDto>> GetAll(Guid userId)
         {
             var result = await _conversionRepository.GetAll().Where(x => x.IsDeleted == false &&
                                                                          (x.ReceiverId == userId || x.SenderId == userId
@@ -55,7 +56,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ConversationService
             return result;
         }
 
-        public async Task<ConversationDto> GetById(long id)
+        public async Task<ConversationDto> GetById(Guid id)
         {
             var result = await _conversionRepository.GetAll().Where(x => x.IsDeleted == false && x.Id==id)
                 .Include(x => x.Receiver).Include(x => x.Sender)
@@ -91,7 +92,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ConversationService
             return result;
         }
 
-        public async Task Delete(long id)
+        public async Task Delete(Guid id)
         {
             var result = await _conversionRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.IsDeleted == false && x.Id == id);

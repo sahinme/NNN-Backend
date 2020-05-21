@@ -1,10 +1,11 @@
+using System;
 using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
 {
     public class GetAllCommunityDto
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string LogoPath { get; set; }

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 
@@ -7,8 +8,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
     {
         public string Content { get; set; }
         public IFormFile ContentFile { get; set; }
-        public long CommunityId { get; set; }
-        public long UserId { get; set; }
+        public Guid CommunityId { get; set; }
+        public Guid UserId { get; set; }
         public ContentType ContentType { get; set; }
 
         public string LinkUrl { get; set; }

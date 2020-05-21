@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.NotificationService;
@@ -15,21 +16,21 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetUser(long userId)
+        public async Task<IActionResult> GetUser(Guid userId)
         {
             var result = await _notificationAppService.GetUserNotifications(userId);
             return Ok(result);
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetCount(long userId)
+        public async Task<IActionResult> GetCount(Guid userId)
         {
             var result = await _notificationAppService.GetUnReads(userId);
             return Ok(new { count=result });
         }
 
         [HttpPut]
-        public async Task<IActionResult> MarkAsRead(long[] ids)
+        public async Task<IActionResult> MarkAsRead(Guid[] ids)
         {
             await _notificationAppService.MarkAsRead(ids);
             return Ok();

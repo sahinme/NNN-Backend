@@ -21,7 +21,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
 
         [HttpGet("by-id")]
-        public async Task<IActionResult> GetUser(int id)
+        public async Task<IActionResult> GetUser(Guid id)
         {
             var result = await _userService.GetUserById(id);
             return Ok(result);
@@ -60,21 +60,21 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpPost]
-        public async Task<IActionResult> JoinCommunity(long userId,long communityId)
+        public async Task<IActionResult> JoinCommunity(Guid userId,Guid communityId)
         {
             var result = await _userService.JoinCommunity(userId, communityId);
             return Ok(result);
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetUserCommunities(long userId)
+        public async Task<IActionResult> GetUserCommunities(Guid userId)
         {
             var result = await _userService.GetUserCommunities(userId);
             return Ok(result);
         }
         
         [HttpDelete]
-        public async Task<IActionResult> LeaveFromCommunity(long userId,long communityId)
+        public async Task<IActionResult> LeaveFromCommunity(Guid userId,Guid communityId)
         {
             await _userService.LeaveFromCommunity(userId, communityId);
             return Ok();
@@ -95,7 +95,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteUser(long id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
             await _userService.DeleteUser(id);
             return Ok();

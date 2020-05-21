@@ -77,7 +77,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             return post;
         }
 
-        public async Task<PostDto> GetPostById(long id,long? userId)
+        public async Task<PostDto> GetPostById(Guid id,Guid? userId)
         {
             var post = await _postRepository.GetAll().Where(x => x.Id == id).Include(x => x.User)
                 .Include(x=>x.Comments).ThenInclude(x=>x.Replies).ThenInclude(x=>x.ParentReply)
@@ -125,7 +125,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                             Parent = new ParentDto
                             {
                                 ParentReplyUserName = r.ParentId != null ? r.ParentReply.User.Username : null,
-                                UserId = r.ParentId != null ? r.ParentReply.User.Id : (long?) null
+                                UserId = r.ParentId != null ? r.ParentReply.User.Id : (Guid?) null
                             }  ,
                             IsLoggedReply = r.UserId==userId,
                             IsLoggedLiked = r.Likes.Any(q=>q.IsDeleted==false && q.UserId==userId),
@@ -148,7 +148,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             return post;
         }
 
-        public async Task Delete(long id)
+        public async Task Delete(Guid id)
         {
             var post = await _postRepository.GetByIdAsync(id);
             post.IsDeleted = true;
@@ -255,7 +255,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             return model;
         }
         
-        public async Task<List<GetAllPostDto>> HomePosts(long userId)
+        public async Task<List<GetAllPostDto>> HomePosts(Guid userId)
         {
             var result = await  _communityUserRepository.GetAll().Where(x => x.UserId == userId && x.IsDeleted==false )
                 .Include(x => x.Community).ThenInclude(x => x.Posts)
@@ -286,6 +286,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         CommentsCount = p.Comments.Count(c=>c.IsDeleted==false)
                     }).OrderByDescending(p=>p.Id).ToList()
                 }).ToListAsync();
+
+            if (result.Count == 0) return await UnauthorizedHomePosts();
             
             var posts = new List<GetAllPostDto>();
             foreach (var item in result)

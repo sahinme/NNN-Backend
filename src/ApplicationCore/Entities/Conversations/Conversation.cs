@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Nnn.ApplicationCore.Entities.Messages;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
@@ -7,8 +8,8 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Conversations
 {
     public class Conversation:BaseEntity,IAggregateRoot
     {
-        public long SenderId { get; set; }
-        public long ReceiverId { get; set; }
+        public Guid SenderId { get; set; }
+        public Guid ReceiverId { get; set; }
 
         public User Sender { get; set; }
         public User Receiver { get; set; }

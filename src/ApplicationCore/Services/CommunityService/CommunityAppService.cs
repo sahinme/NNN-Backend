@@ -94,7 +94,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             return community;
         }
 
-        public async Task<List<GetAllCommunityDto>> OfModerators(long userId)
+        public async Task<List<GetAllCommunityDto>> OfModerators(Guid userId)
         {
             var result = await _communityUserRepository.GetAll()
                 .Where(x => x.IsDeleted == false && x.IsAdmin && x.UserId == userId)
@@ -110,7 +110,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             return result;
         }
 
-        public async Task<List<CommunityUserDto>> Users(long id)
+        public async Task<List<CommunityUserDto>> Users(Guid id)
         {
             var result = await _communityRepository.GetAll().Where(x => x.Id == id && x.IsDeleted == false)
                 .Include(x => x.Users)
@@ -128,7 +128,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             return users;
         }
 
-        public async Task<CommunityDto> GetById(long id,long? userId)
+        public async Task<CommunityDto> GetById(Guid id,Guid? userId)
         {
             var result = await _communityRepository.GetAll().Where(x => x.Id == id && x.IsDeleted == false)
                 .Include(x => x.Users)
@@ -179,7 +179,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             return result;
         }
 
-        public async Task<List<GetAllCommunityDto>> GetPopulars(long? userId)
+        public async Task<List<GetAllCommunityDto>> GetPopulars(Guid? userId)
         {
             var result = await _communityRepository.GetAll().Where(x => x.IsDeleted == false)
                 .Include(x => x.Users).ThenInclude(x => x.User)

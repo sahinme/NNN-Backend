@@ -10,8 +10,8 @@ using Microsoft.Nnn.Infrastructure.Data;
 namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(NnnContext))]
-    [Migration("20200517225059_notify")]
-    partial class notify
+    [Migration("20200519193707_guidadding")]
+    partial class guidadding
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,9 +23,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Categories.Category", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -46,11 +45,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.CommentLikes.CommentLike", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<long>("CommentId");
+                    b.Property<Guid>("CommentId");
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -62,7 +60,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("UserId");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("Id");
 
@@ -75,9 +73,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Comments.Comment", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Content");
 
@@ -91,9 +88,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("PostId");
+                    b.Property<Guid>("PostId");
 
-                    b.Property<long>("UserId");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("Id");
 
@@ -106,11 +103,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Communities.Community", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<long>("CategoryId");
+                    b.Property<Guid>("CategoryId");
 
                     b.Property<string>("CoverImagePath");
 
@@ -139,11 +135,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers.CommunityUser", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<long>("CommunityId");
+                    b.Property<Guid>("CommunityId");
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -159,7 +154,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<bool>("Suspended");
 
-                    b.Property<long>("UserId");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("Id");
 
@@ -172,9 +167,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Conversations.Conversation", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -186,9 +180,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("ReceiverId");
+                    b.Property<Guid>("ReceiverId");
 
-                    b.Property<long>("SenderId");
+                    b.Property<Guid>("SenderId");
 
                     b.HasKey("Id");
 
@@ -201,13 +195,12 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Messages.Message", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Content");
 
-                    b.Property<long>("ConversationId");
+                    b.Property<Guid>("ConversationId");
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -221,9 +214,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("ReceiverId");
+                    b.Property<Guid>("ReceiverId");
 
-                    b.Property<long>("SenderId");
+                    b.Property<Guid>("SenderId");
 
                     b.HasKey("Id");
 
@@ -238,11 +231,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations.ModeratorOperation", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<long>("CommunityId");
+                    b.Property<Guid>("CommunityId");
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -250,7 +242,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<bool>("IsDeleted");
 
-                    b.Property<long>("ModeratorId");
+                    b.Property<Guid>("ModeratorId");
 
                     b.Property<string>("ModifiedBy");
 
@@ -258,9 +250,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<string>("Operation");
 
-                    b.Property<long?>("PostId");
+                    b.Property<Guid?>("PostId");
 
-                    b.Property<long?>("UserId");
+                    b.Property<Guid?>("UserId");
 
                     b.HasKey("Id");
 
@@ -277,9 +269,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Notifications.Notification", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Content");
 
@@ -287,15 +278,21 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<string>("CreatorUserId");
 
+                    b.Property<string>("ImgPath");
+
                     b.Property<bool>("IsDeleted");
+
+                    b.Property<bool>("IsRead");
 
                     b.Property<string>("ModifiedBy");
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("OwnerUserId");
+                    b.Property<Guid>("OwnerUserId");
 
-                    b.Property<long>("TargetId");
+                    b.Property<Guid>("TargetId");
+
+                    b.Property<string>("TargetName");
 
                     b.Property<int>("Type");
 
@@ -306,11 +303,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostCategories.PostCategory", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<long>("CategoryId");
+                    b.Property<Guid>("CategoryId");
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -322,7 +318,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("PostId");
+                    b.Property<Guid>("PostId");
 
                     b.HasKey("Id");
 
@@ -335,9 +331,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostTags.PostTag", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -349,9 +344,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("PostId");
+                    b.Property<Guid>("PostId");
 
-                    b.Property<long>("TagId");
+                    b.Property<Guid>("TagId");
 
                     b.HasKey("Id");
 
@@ -364,9 +359,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostTags.Tag", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -388,9 +382,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.PostVotes.PostVote", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -402,9 +395,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("PostId");
+                    b.Property<Guid>("PostId");
 
-                    b.Property<long>("UserId");
+                    b.Property<Guid>("UserId");
 
                     b.Property<short>("Value");
 
@@ -419,11 +412,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Posts.Post", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<long>("CommunityId");
+                    b.Property<Guid>("CommunityId");
 
                     b.Property<string>("Content");
 
@@ -443,7 +435,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("UserId");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("Id");
 
@@ -456,11 +448,10 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Replies.Reply", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<long>("CommentId");
+                    b.Property<Guid>("CommentId");
 
                     b.Property<string>("Content");
 
@@ -474,9 +465,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long?>("ParentId");
+                    b.Property<Guid?>("ParentId");
 
-                    b.Property<long>("UserId");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("Id");
 
@@ -491,9 +482,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.ReplyLikes.ReplyLike", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("CreatedDate");
 
@@ -505,9 +495,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("ModifiedDate");
 
-                    b.Property<long>("ReplyId");
+                    b.Property<Guid>("ReplyId");
 
-                    b.Property<long>("UserId");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("Id");
 
@@ -520,9 +510,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Microsoft.Nnn.ApplicationCore.Entities.Users.User", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Bio")
                         .HasMaxLength(181);

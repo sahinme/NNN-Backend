@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.Nnn.ApplicationCore.Entities.Conversations;
@@ -8,9 +9,9 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Messages
 {
     public class Message:BaseEntity,IAggregateRoot
     {
-        public long SenderId { get; set; }
-        public long ReceiverId { get; set; }
-        public long ConversationId { get; set; }
+        public Guid SenderId { get; set; }
+        public Guid ReceiverId { get; set; }
+        public Guid ConversationId { get; set; }
         public string Content { get; set; }
         
         [DefaultValue(false)]

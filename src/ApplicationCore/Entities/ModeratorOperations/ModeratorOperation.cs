@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
@@ -9,10 +10,10 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations
     public class ModeratorOperation:BaseEntity,IAggregateRoot
     {
         public string Operation { get; set; }
-        public long ModeratorId { get; set; }
-        public long CommunityId { get; set; }
-        public long? PostId { get; set; }
-        public long? UserId { get; set; }
+        public Guid ModeratorId { get; set; }
+        public Guid CommunityId { get; set; }
+        public Guid? PostId { get; set; }
+        public Guid? UserId { get; set; }
         
         [ForeignKey(nameof(ModeratorId))]
         public virtual User Moderator { get; set; }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Nnn.ApplicationCore.Entities.Replies;
@@ -9,8 +10,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
     public interface IReplyAppService
     {
         Task<Reply> CreateReply(CreateReplyDto input);
-        Task<ReplyLike> Like(long userId, long replyId);
-        Task Unlike(long userId, long replyId);
-        Task Delete(long id);
+        Task<ReplyLike> Like(Guid userId, Guid replyId);
+        Task Unlike(Guid userId, Guid replyId);
+        Task Delete(Guid id);
     }
 }

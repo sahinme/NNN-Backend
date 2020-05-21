@@ -1,10 +1,9 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 {
-    public partial class @fixed : Migration
+    public partial class guidadding : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,8 +11,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "Category",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
@@ -27,45 +25,21 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Communities",
-                columns: table => new
-                {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    ModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatorUserId = table.Column<string>(nullable: true),
-                    ModifiedBy = table.Column<string>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    LogoPath = table.Column<string>(nullable: true),
-                    CoverImagePath = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Communities", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Notifications",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     Content = table.Column<string>(nullable: true),
-                    ContentId = table.Column<long>(nullable: false),
-                    Title = table.Column<string>(nullable: true),
-                    SenderId = table.Column<long>(nullable: false),
-                    SenderType = table.Column<int>(nullable: false),
-                    OwnerId = table.Column<long>(nullable: false),
-                    OwnerType = table.Column<int>(nullable: false),
-                    NotifyContentType = table.Column<int>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
+                    TargetId = table.Column<Guid>(nullable: false),
+                    OwnerUserId = table.Column<Guid>(nullable: false),
+                    TargetName = table.Column<string>(nullable: true),
+                    ImgPath = table.Column<string>(nullable: true),
                     IsRead = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
@@ -77,8 +51,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "Tags",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
@@ -95,8 +68,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
@@ -118,18 +90,74 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CommunityUsers",
+                name: "Communities",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    UserId = table.Column<long>(nullable: false),
-                    CommunityId = table.Column<long>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    LogoPath = table.Column<string>(nullable: true),
+                    CoverImagePath = table.Column<string>(nullable: true),
+                    CategoryId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Communities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Communities_Category_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Category",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Conversations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    ModifiedDate = table.Column<DateTime>(nullable: false),
+                    CreatorUserId = table.Column<string>(nullable: true),
+                    ModifiedBy = table.Column<string>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    SenderId = table.Column<Guid>(nullable: false),
+                    ReceiverId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Conversations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Conversations_Users_ReceiverId",
+                        column: x => x.ReceiverId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Conversations_Users_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CommunityUsers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    ModifiedDate = table.Column<DateTime>(nullable: false),
+                    CreatorUserId = table.Column<string>(nullable: true),
+                    ModifiedBy = table.Column<string>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    CommunityId = table.Column<Guid>(nullable: false),
                     IsAdmin = table.Column<bool>(nullable: false),
                     Suspended = table.Column<bool>(nullable: false)
                 },
@@ -154,8 +182,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "Posts",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
@@ -164,8 +191,8 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     Content = table.Column<string>(nullable: true),
                     MediaContentPath = table.Column<string>(nullable: true),
                     ContentType = table.Column<int>(nullable: false),
-                    UserId = table.Column<long>(nullable: false),
-                    CommunityId = table.Column<long>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    CommunityId = table.Column<Guid>(nullable: false),
                     LinkUrl = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -186,19 +213,57 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    ModifiedDate = table.Column<DateTime>(nullable: false),
+                    CreatorUserId = table.Column<string>(nullable: true),
+                    ModifiedBy = table.Column<string>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    SenderId = table.Column<Guid>(nullable: false),
+                    ReceiverId = table.Column<Guid>(nullable: false),
+                    ConversationId = table.Column<Guid>(nullable: false),
+                    Content = table.Column<string>(nullable: true),
+                    IsRead = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Conversations_ConversationId",
+                        column: x => x.ConversationId,
+                        principalTable: "Conversations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_ReceiverId",
+                        column: x => x.ReceiverId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Comments",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     Content = table.Column<string>(nullable: true),
-                    PostId = table.Column<long>(nullable: false),
-                    UserId = table.Column<long>(nullable: false)
+                    PostId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -221,18 +286,17 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "ModeratorOperations",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     Operation = table.Column<string>(nullable: true),
-                    ModeratorId = table.Column<long>(nullable: false),
-                    CommunityId = table.Column<long>(nullable: false),
-                    PostId = table.Column<long>(nullable: true),
-                    UserId = table.Column<long>(nullable: true)
+                    ModeratorId = table.Column<Guid>(nullable: false),
+                    CommunityId = table.Column<Guid>(nullable: false),
+                    PostId = table.Column<Guid>(nullable: true),
+                    UserId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -267,15 +331,14 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "PostCategories",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    PostId = table.Column<long>(nullable: false),
-                    CategoryId = table.Column<long>(nullable: false)
+                    PostId = table.Column<Guid>(nullable: false),
+                    CategoryId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -291,22 +354,21 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                         column: x => x.PostId,
                         principalTable: "Posts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
                 name: "PostTags",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    PostId = table.Column<long>(nullable: false),
-                    TagId = table.Column<long>(nullable: false)
+                    PostId = table.Column<Guid>(nullable: false),
+                    TagId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -329,15 +391,14 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "PostVotes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    UserId = table.Column<long>(nullable: false),
-                    PostId = table.Column<long>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    PostId = table.Column<Guid>(nullable: false),
                     Value = table.Column<short>(nullable: false)
                 },
                 constraints: table =>
@@ -361,15 +422,14 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "CommentLikes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    UserId = table.Column<long>(nullable: false),
-                    CommentId = table.Column<long>(nullable: false)
+                    UserId = table.Column<Guid>(nullable: false),
+                    CommentId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -392,17 +452,16 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "Reply",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     Content = table.Column<string>(nullable: true),
-                    UserId = table.Column<long>(nullable: false),
-                    CommentId = table.Column<long>(nullable: false),
-                    ParentId = table.Column<long>(nullable: true)
+                    UserId = table.Column<Guid>(nullable: false),
+                    CommentId = table.Column<Guid>(nullable: false),
+                    ParentId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -431,15 +490,14 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "ReplyLikes",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<Guid>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatorUserId = table.Column<string>(nullable: true),
                     ModifiedBy = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    UserId = table.Column<long>(nullable: false),
-                    ReplyId = table.Column<long>(nullable: false)
+                    UserId = table.Column<Guid>(nullable: false),
+                    ReplyId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -479,6 +537,11 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Communities_CategoryId",
+                table: "Communities",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CommunityUsers_CommunityId",
                 table: "CommunityUsers",
                 column: "CommunityId");
@@ -487,6 +550,31 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "IX_CommunityUsers_UserId",
                 table: "CommunityUsers",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Conversations_ReceiverId",
+                table: "Conversations",
+                column: "ReceiverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Conversations_SenderId",
+                table: "Conversations",
+                column: "SenderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ConversationId",
+                table: "Messages",
+                column: "ConversationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ReceiverId",
+                table: "Messages",
+                column: "ReceiverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SenderId",
+                table: "Messages",
+                column: "SenderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ModeratorOperations_CommunityId",
@@ -583,6 +671,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "CommunityUsers");
 
             migrationBuilder.DropTable(
+                name: "Messages");
+
+            migrationBuilder.DropTable(
                 name: "ModeratorOperations");
 
             migrationBuilder.DropTable(
@@ -601,7 +692,7 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                 name: "ReplyLikes");
 
             migrationBuilder.DropTable(
-                name: "Category");
+                name: "Conversations");
 
             migrationBuilder.DropTable(
                 name: "Tags");
@@ -620,6 +711,9 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Category");
         }
     }
 }

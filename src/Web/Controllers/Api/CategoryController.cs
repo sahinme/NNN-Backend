@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.CategoryService;
@@ -29,7 +30,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetCommunities(long categoryId,long? userId)
+        public async Task<IActionResult> GetCommunities(Guid categoryId,Guid? userId)
         {
             var result = await _categoryAppService.GetCommunitiesByCategory(categoryId,userId);
             return Ok(result);

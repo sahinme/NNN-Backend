@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.CommentService;
@@ -22,7 +23,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                 }
 
         [HttpGet]
-        public async Task<IActionResult> GetPostComments(long postId)
+        public async Task<IActionResult> GetPostComments(Guid postId)
         {
             var comments = await _commentAppService.GetPostComments(postId);
             return Ok(comments);
@@ -36,21 +37,21 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpDelete]
-        public async Task<IActionResult> Delete(long id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             await _commentAppService.Delete(id);
             return Ok();
         }
         
         [HttpPost]
-        public async Task<IActionResult> Like(long userId, long commentId)
+        public async Task<IActionResult> Like(Guid userId, Guid commentId)
         {
             var result = await _commentAppService.Like(userId,commentId);
             return Ok(result);
         }
         
         [HttpDelete]
-        public async Task<IActionResult> Unlike(long userId, long commentId)
+        public async Task<IActionResult> Unlike(Guid userId, Guid commentId)
         {
             await _commentAppService.Unlike(userId,commentId);
             return Ok();

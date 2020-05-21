@@ -18,7 +18,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.NotificationService
             _notificationRepository = notificationRepository;
         }
 
-        public async Task<List<NotificationDto>> GetUserNotifications(long userId)
+        public async Task<List<NotificationDto>> GetUserNotifications(Guid userId)
         {
             var result = await _notificationRepository.GetAll()
                 .Where(x => x.IsDeleted == false && x.OwnerUserId == userId)
@@ -35,14 +35,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.NotificationService
             return result;
         }
 
-        public async Task<long> GetUnReads(long userId)
+        public async Task<long> GetUnReads(Guid userId)
         {
             var result = await _notificationRepository.GetAll()
                 .Where(x => x.IsDeleted == false && x.OwnerUserId == userId && x.IsRead == false).CountAsync();
             return result;
         }
 
-        public async Task MarkAsRead(long[] ids)
+        public async Task MarkAsRead(Guid[] ids)
         {
             foreach (var id in ids)
             {

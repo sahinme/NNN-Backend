@@ -65,7 +65,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
            return comment;
         }
 
-        public async Task<List<CommentDto>> GetPostComments(long postId)
+        public async Task<List<CommentDto>> GetPostComments(Guid postId)
         {
             var postComments = await _commentRepository.GetAll().Where(x => x.IsDeleted == false && x.PostId == postId)
                 .Include(x => x.Post).Include(x => x.User)
@@ -105,14 +105,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
             return comment;
         }
 
-        public async Task Delete(long id)
+        public async Task Delete(Guid id)
         {
             var comment = await _commentRepository.GetByIdAsync(id);
             comment.IsDeleted = true;
             await _commentRepository.UpdateAsync(comment);
         }
 
-        public async Task<CommentLike> Like(long userId, long commentId)
+        public async Task<CommentLike> Like(Guid userId, Guid commentId)
         {
             var isExist = await _commentLikeRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.IsDeleted==false && x.UserId == userId && x.CommentId == commentId);
@@ -148,7 +148,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
             return model;
         }
         
-        public async Task Unlike(long userId, long commentId)
+        public async Task Unlike(Guid userId, Guid commentId)
         {
             var isExist = await _commentLikeRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.IsDeleted==false && x.UserId == userId && x.CommentId == commentId);

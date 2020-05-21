@@ -1,9 +1,11 @@
+using System;
+
 namespace Nnn.ApplicationCore.Services.UserService.Dto
 {
     public class ModeratorRejected
     {
-        public long UserId { get; set; }
-        public long CommunityId { get; set; }
-        public long ModeratorId { get; set; }
+        public Guid UserId { get; set; }
+        public Guid CommunityId { get; set; }
+        public Guid ModeratorId { get; set; }
     }
 }

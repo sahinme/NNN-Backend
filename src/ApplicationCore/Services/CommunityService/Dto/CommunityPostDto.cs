@@ -7,7 +7,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
 {
     public class CommunityPostDto
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
         public string Content { get; set; }
         public string MediaContentPath { get; set; }
         public ContentType ContentType { get; set; }

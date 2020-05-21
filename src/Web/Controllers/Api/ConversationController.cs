@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.ConversationService;
@@ -22,14 +23,14 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetAll(long userId)
+        public async Task<IActionResult> GetAll(Guid userId)
         {
             var result = await _conversationAppService.GetAll(userId);
             return Ok(result);
         }
         
         [HttpGet("by-id")]
-        public async Task<IActionResult> Get(long id)
+        public async Task<IActionResult> Get(Guid id)
         {
             var result = await _conversationAppService.GetById(id);
             return Ok(result);

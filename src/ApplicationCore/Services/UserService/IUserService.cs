@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
@@ -10,15 +11,15 @@ namespace Microsoft.Nnn.ApplicationCore.Interfaces
     public interface IUserService
     {
         Task<User> CreateUser(CreateUserDto input);
-        Task<UserDto> GetUserById(int id);
+        Task<UserDto> GetUserById(Guid id);
         Task<UserDto> GetByUsername(string username);
         Task UpdateUser(UpdateUserDto input);
         Task<bool> Login(LoginDto input);
-        Task DeleteUser(long id);
-        Task<CommunityUser> JoinCommunity(long userId,long communityId);
-        Task LeaveFromCommunity(long userId,long communityId);
+        Task DeleteUser(Guid id);
+        Task<CommunityUser> JoinCommunity(Guid userId,Guid communityId);
+        Task LeaveFromCommunity(Guid userId,Guid communityId);
         Task ModeratorRejectedJoin(ModeratorRejected input);
-        Task<List<GetAllCommunityDto>> GetUserCommunities(long userId);
+        Task<List<GetAllCommunityDto>> GetUserCommunities(Guid userId);
         Task<bool> VerifyEmail(string verificationCode);
 
     }

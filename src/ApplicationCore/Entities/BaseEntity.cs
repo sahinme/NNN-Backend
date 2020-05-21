@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
 
 namespace Microsoft.Nnn.ApplicationCore.Entities
 {
@@ -11,7 +12,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        public Guid Id { get; set; }
 
         private DateTime? _createdDate = null;
         

@@ -50,15 +50,15 @@ namespace Microsoft.Nnn.Infrastructure.Services
                     {
                         // The third parameter is useSSL (true if the client should make an SSL-wrapped
                         // connection to the server; otherwise, false).
-                        await client.ConnectAsync("smtp.gmail.com", 465);
+                        await client.ConnectAsync("mail.saalla.com", 995);
                     }
                     else
-                    {
+                    {    
                         await client.ConnectAsync(_emailSettings.MailServer);
                     }
 
                     // Note: only needed if the SMTP server requires authentication
-                    await client.AuthenticateAsync("iamfreeadmiral@gmail.com", "Msnadresim123.,");
+                    await client.AuthenticateAsync("noreply@saalla.com", "KNaa5H3fFULSiQx");
 
                     await client.SendAsync(mimeMessage);
 

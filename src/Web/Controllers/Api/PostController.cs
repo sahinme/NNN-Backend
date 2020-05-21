@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
 
         [HttpGet("by-id")]
-        public async Task<IActionResult> Get(long id,long? userId)
+        public async Task<IActionResult> Get(Guid id,Guid? userId)
         {
             var post = await _postAppService.GetPostById(id,userId);
             return Ok(post);
@@ -39,7 +40,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> HomePosts(long userId)
+        public async Task<IActionResult> HomePosts(Guid userId)
         {
             var post = await _postAppService.HomePosts(userId);
             return Ok(post);
@@ -54,7 +55,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         
         
         [HttpDelete]
-        public async Task<IActionResult> Delete(long id)
+        public async Task<IActionResult> Delete(Guid id)
         {
              await _postAppService.Delete(id);
             return Ok();
