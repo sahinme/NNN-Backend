@@ -47,7 +47,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             if (isEmailTaken != null)
             {
                 var model = new User();
-                model.Username = "Bu e-post adresi daha önce alınmış";
+                model.EmailAddress = "Bu E-Posta adresi daha önce alınmış";
                 return model;
             }
         

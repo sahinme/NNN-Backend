@@ -30,9 +30,9 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet("by-id")]
-        public async Task<IActionResult> Get(Guid id)
+        public async Task<IActionResult> Get(Guid id,Guid userId)
         {
-            var result = await _conversationAppService.GetById(id);
+            var result = await _conversationAppService.GetById(id,userId);
             return Ok(result);
         }
     }

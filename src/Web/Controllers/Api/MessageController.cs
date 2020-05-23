@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.MessageService;
@@ -19,6 +20,20 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         {
             var result = await _messageAppService.Create(input);
             return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUnReads(Guid userId)
+        {
+            var count = await _messageAppService.GetUnreadCount(userId);
+            return Ok( new {error=false,count});
+        }
+        
+        [HttpPut]
+        public async Task<IActionResult> MarkAsRead(Guid[] ids)
+        {
+            await _messageAppService.MarkAsRead(ids);
+            return Ok();
         }
     }
 }

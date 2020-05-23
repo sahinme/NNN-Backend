@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Conversations;
+using Microsoft.Nnn.ApplicationCore.Entities.Messages;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.ConversationService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.MessageService.Dto;
@@ -13,10 +14,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ConversationService
     public class ConversationAppService:IConversationAppService
     {
         private readonly IAsyncRepository<Conversation> _conversionRepository;
+        private readonly IAsyncRepository<Message> _messageRepository;
 
-        public ConversationAppService(IAsyncRepository<Conversation> conversionRepository)
+        public ConversationAppService(IAsyncRepository<Conversation> conversionRepository,IAsyncRepository<Message> messageRepository)
         {
             _conversionRepository = conversionRepository;
+            _messageRepository = messageRepository;
         }
         
         public async Task<Conversation> Create(CreateConversationDto input)
@@ -39,24 +42,25 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ConversationService
                 .Select(x => new ConversationDto
                 {
                     Id = x.Id,
+                    IsUnRead = x.Messages.Any(i=>i.IsRead==false  && i.Receiver.Id ==userId ),
                     Receiver = new MessageUserDto
                     {
                         Id = x.Receiver.Id,
                         Username = x.Receiver.Username,
-                        LogoPath = BlobService.BlobService.GetImageUrl(x.Receiver.ProfileImagePath)
+                        LogoPath = x.Receiver.ProfileImagePath == null ? null : BlobService.BlobService.GetImageUrl(x.Receiver.ProfileImagePath)
                     },
                     Sender = new MessageUserDto
                     {
                         Id = x.Sender.Id,
                         Username = x.Sender.Username,
-                        LogoPath = BlobService.BlobService.GetImageUrl(x.Sender.ProfileImagePath)
+                        LogoPath = x.Sender.ProfileImagePath==null ? null : BlobService.BlobService.GetImageUrl(x.Sender.ProfileImagePath)
                     },
                     CreatedDate = x.CreatedDate
-                }).ToListAsync();
+                }).OrderByDescending(p=>p.Id).ToListAsync();
             return result;
         }
 
-        public async Task<ConversationDto> GetById(Guid id)
+        public async Task<ConversationDto> GetById(Guid id,Guid userId)
         {
             var result = await _conversionRepository.GetAll().Where(x => x.IsDeleted == false && x.Id==id)
                 .Include(x => x.Receiver).Include(x => x.Sender)
@@ -79,6 +83,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ConversationService
                     {
                         Id = m.Id,
                         Content = m.Content,
+                        IsRead = m.IsRead,
                         CreatedDate = m.CreatedDate,
                         User = new MessageUserDto
                         {
@@ -89,6 +94,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ConversationService
                     }).ToList(),
                     CreatedDate = x.CreatedDate
                 }).FirstOrDefaultAsync();
+            var messages = await _messageRepository.GetAll()
+                .Where(q => !q.IsRead && q.ConversationId == id && q.ReceiverId == userId)
+                .ToListAsync();
+            foreach (var message in messages)
+            {
+                message.IsRead = true;
+                await _messageRepository.UpdateAsync(message);
+            }
             return result;
         }
 

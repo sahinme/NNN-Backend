@@ -1,10 +1,8 @@
 ﻿using System;
+using System.Net;
+using System.Net.Mail;
 using System.Threading.Tasks;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Options;
-using Microsoft.Nnn.ApplicationCore.Entities.EmailSettings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using MimeKit;
 
@@ -14,62 +12,37 @@ namespace Microsoft.Nnn.Infrastructure.Services
     // For more details see https://go.microsoft.com/fwlink/?LinkID=532713
     public class EmailSender : IEmailSender
     {
-        private readonly EmailSettings _emailSettings;
-        private readonly IHostingEnvironment _environment;
-
-        public EmailSender(IOptions<EmailSettings> emailSettings,
-            IHostingEnvironment environment
-            )
+        private readonly IConfiguration _configuration;
+        public EmailSender(IConfiguration configuration)
         {
-            _emailSettings = emailSettings.Value;
-            _environment = environment;
+            _configuration = configuration;
         }
-        public async Task SendEmailAsync(string email, string subject, string message)
+        public async Task SendEmail(string email, string subject, string message)
         {
-            try
+            using (var client = new SmtpClient())
             {
-                var mimeMessage = new MimeMessage();
-
-                mimeMessage.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.Sender));
-
-                mimeMessage.To.Add(new MailboxAddress(email));
-
-                mimeMessage.Subject = subject;
-
-                mimeMessage.Body = new TextPart("html")
+                var credential = new NetworkCredential
                 {
-                    Text = message
+                    UserName = _configuration["Email:Email"],
+                    Password = _configuration["Email:Password"],
                 };
 
-                using (var client = new SmtpClient())
+                client.Credentials = credential;
+                client.Host = _configuration["Email:Host"];
+                client.Port = int.Parse(_configuration["Email:Port"]);
+                client.EnableSsl = true;
+
+                using (var emailMessage = new MailMessage())
                 {
-                    // For demo-purposes, accept all SSL certificates (in case the server supports STARTTLS)
-                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-
-                    if (_environment.IsDevelopment())
-                    {
-                        // The third parameter is useSSL (true if the client should make an SSL-wrapped
-                        // connection to the server; otherwise, false).
-                        await client.ConnectAsync("mail.saalla.com", 995);
-                    }
-                    else
-                    {    
-                        await client.ConnectAsync(_emailSettings.MailServer);
-                    }
-
-                    // Note: only needed if the SMTP server requires authentication
-                    await client.AuthenticateAsync("noreply@saalla.com", "KNaa5H3fFULSiQx");
-
-                    await client.SendAsync(mimeMessage);
-
-                    await client.DisconnectAsync(true);
+                    emailMessage.To.Add(new MailAddress(email));
+                    emailMessage.From = new MailAddress(_configuration["Email:Email"]);
+                    emailMessage.Subject = subject;
+                    emailMessage.Body = message;
+                    client.Send(emailMessage);
                 }
-
             }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException(ex.Message);
-            }
+            await Task.CompletedTask;
         }
+
     }
 }

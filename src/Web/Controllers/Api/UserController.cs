@@ -43,11 +43,19 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                 {
                     return BadRequest();
                 }
+
                 var user = await _userService.CreateUser(input);
-                var subject = "http:saalla.com/" + user.VerificationCode;
-                await _emailSender.SendEmailAsync(user.EmailAddress, "E-posta onaylama",subject );
+                if (user.Id != Guid.Empty)
+                {
+                    var subject = "http:saalla.com/" + user.VerificationCode;
+                    await _emailSender.SendEmail(user.EmailAddress, "E-posta onaylama", subject);
+                }
+
                 user.Password = null;
                 user.VerificationCode = null;
+                if (user.Id == Guid.Empty)
+                    return Ok(new
+                        {user, error = true});
                 return Ok(user);
             }
             catch (Exception e)
@@ -104,7 +112,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         [HttpPost]
         public async Task EmailSend(string email, string subject, string message)
         {
-            await _emailSender.SendEmailAsync(email, subject, message);
+            await _emailSender.SendEmail(email, subject, message);
         }
     }
 }

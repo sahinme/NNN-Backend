@@ -10,7 +10,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ConversationService
     {
         Task<Conversation> Create(CreateConversationDto input);
         Task<List<ConversationDto>> GetAll(Guid userId);
-        Task<ConversationDto> GetById(Guid id);
+        Task<ConversationDto> GetById(Guid id,Guid userId);
         Task Delete(Guid id);
     }
 }

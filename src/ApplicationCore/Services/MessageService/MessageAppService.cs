@@ -52,5 +52,22 @@ namespace Microsoft.Nnn.ApplicationCore.Services.MessageService
             await _messageRepository.AddAsync(model);
             return model;
         }
+
+        public async Task<long> GetUnreadCount(Guid userId)
+        {
+            var count = await _messageRepository.GetAll()
+                .CountAsync(x => x.ReceiverId == userId && !x.IsRead && !x.IsDeleted);
+            return count;
+        }
+        
+        public async Task MarkAsRead(Guid[] ids)
+        {
+            foreach (var id in ids)
+            {
+                var notification = await _messageRepository.GetByIdAsync(id);
+                notification.IsRead = true;
+                await _messageRepository.UpdateAsync(notification);
+            }
+        }
     }
 }
