@@ -21,6 +21,9 @@ namespace Microsoft.Nnn.ApplicationCore.Interfaces
         Task ModeratorRejectedJoin(ModeratorRejected input);
         Task<List<GetAllCommunityDto>> GetUserCommunities(Guid userId);
         Task<bool> VerifyEmail(string verificationCode);
+        Task<bool> SendResetCode(string emailAddress);
+        Task<bool> ResetPassword(ResetPasswordDto input);
+        Task<bool> ChangePassword(ChangePasswordDto input);
 
     }
 }

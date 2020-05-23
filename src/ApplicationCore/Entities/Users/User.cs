@@ -25,6 +25,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Users
         public string Bio { get; set; }
 
         public string VerificationCode { get; set; }
+        public string ResetPasswordCode { get; set; }
         [DefaultValue(false)]
         public bool EmailVerified { get; set; }
         private DateTime? _expirationDate = null;

@@ -35,7 +35,7 @@ namespace Microsoft.Nnn.Infrastructure.Services
                 using (var emailMessage = new MailMessage())
                 {
                     emailMessage.To.Add(new MailAddress(email));
-                    emailMessage.From = new MailAddress(_configuration["Email:Email"]);
+                    emailMessage.From = new MailAddress(_configuration["Email:Email"],"Saalla");
                     emailMessage.Subject = subject;
                     emailMessage.Body = message;
                     client.Send(emailMessage);

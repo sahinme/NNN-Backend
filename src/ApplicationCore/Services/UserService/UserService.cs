@@ -20,17 +20,20 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
         private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
         private readonly IAsyncRepository<ModeratorOperation> _moderatorOperationRepository;
         private readonly IBlobService _blobService;
+        private readonly IEmailSender _emailSender;
 
         public UserService(
             IAsyncRepository<User> userRepository,IBlobService blobService,
             IAsyncRepository<CommunityUser> communityUserRepository,
-            IAsyncRepository<ModeratorOperation> moderatorOperationRepository
+            IAsyncRepository<ModeratorOperation> moderatorOperationRepository,
+            IEmailSender emailSender
             )
         {
             _userRepository = userRepository;
             _blobService = blobService;
             _communityUserRepository = communityUserRepository;
             _moderatorOperationRepository = moderatorOperationRepository;
+            _emailSender = emailSender;
         }
         
         public async Task<User> CreateUser(CreateUserDto input)
@@ -111,6 +114,57 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 return false;
             }
             user.EmailVerified = true;
+            await _userRepository.UpdateAsync(user);
+            return true;
+        }
+
+        public async Task<bool> SendResetCode(string emailAddress)
+        {
+            try
+            {
+                var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.EmailAddress == emailAddress);
+                if(user==null) throw new Exception("Kullanıcı bulunamadı");
+
+                var resetCode = RandomString.GenerateString(10);
+                user.ResetPasswordCode = resetCode;
+                await _userRepository.UpdateAsync(user);
+                var message = "Şifre Sıfırlama İçin Doğrulama Kodu: " + resetCode;
+                await _emailSender.SendEmail(emailAddress, "Şifre Sıfırlama", message);
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.ToString());
+            }
+        }
+    
+        public async Task<bool> ResetPassword(ResetPasswordDto input)
+        {
+            var user = await _userRepository.GetAll().Where(x =>
+                    x.EmailAddress == input.EmailAddress && x.ResetPasswordCode == input.ResetCode)
+                .FirstOrDefaultAsync();
+            if (user == null)
+            {
+                throw new Exception("Böyle bir işlem yok");
+            }
+            
+            var hashedPassword = SecurePasswordHasherHelper.Hash(input.NewPassword);
+            user.Password = hashedPassword;
+            await _userRepository.UpdateAsync(user);
+            return true;
+        }
+        
+        public async Task<bool> ChangePassword(ChangePasswordDto input)
+        {
+            var user = await _userRepository.GetByIdAsync(input.UserId);
+            if (user == null)
+            {
+                throw new Exception("Kullanici bulunamadi");
+            }
+            var decodedPassword = SecurePasswordHasherHelper.Verify(input.OldPassword, user.Password);
+            if(!decodedPassword) throw new Exception("Eski sifre yanlis");
+            var hashedPassword = SecurePasswordHasherHelper.Hash(input.NewPassword);
+            user.Password = hashedPassword;
             await _userRepository.UpdateAsync(user);
             return true;
         }

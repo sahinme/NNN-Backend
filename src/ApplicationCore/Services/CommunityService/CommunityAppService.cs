@@ -174,7 +174,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                         ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath),
                         UserName = x.User.Username
                     },
-                }).ToListAsync();
+                }).OrderByDescending(x=>x.Id).ToListAsync();
             result.Posts = posts;
             return result;
         }
