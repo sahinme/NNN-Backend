@@ -15,5 +15,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
         Task<List<GetAllCommunityDto>> GetPopulars(Guid? userId);
         Task<List<GetAllCommunityDto>> OfModerators(Guid userId);
         Task<List<CommunityUserDto>> Users(Guid id);
+        Task<List<SearchDto>> Search(string text);
     }
 }

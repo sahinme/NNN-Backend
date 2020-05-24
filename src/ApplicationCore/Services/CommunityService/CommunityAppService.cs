@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
+using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto;
@@ -18,14 +19,17 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
         private readonly IAsyncRepository<Community> _communityRepository;
         private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
         private readonly IAsyncRepository<Post> _postRepository;
+        private readonly IAsyncRepository<User> _userRepository;
         private readonly IBlobService _blobService;
 
         public CommunityAppService(IAsyncRepository<Community> communityRepository,IBlobService blobService,
-            IAsyncRepository<Post> postRepository,IAsyncRepository<CommunityUser> communityUserRepository)
+            IAsyncRepository<Post> postRepository,IAsyncRepository<CommunityUser> communityUserRepository,
+            IAsyncRepository<User> userRepository)
         {
             _communityRepository = communityRepository;
             _blobService = blobService;
             _postRepository = postRepository;
+            _userRepository = userRepository;
             _communityUserRepository = communityUserRepository;
         }
         
@@ -194,6 +198,33 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                 }).OrderByDescending(x=>x.MemberCount).Take(5).ToListAsync();
             return result;
 
+        }
+        
+        public async Task<List<SearchDto>> Search(string text)
+        {
+            var coms = await _communityRepository.GetAll().Where(x =>
+                    x.IsDeleted == false && x.Name.Contains(text) || x.Description.Contains(text))
+                .Select(x => new SearchDto
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    LogoPath = BlobService.BlobService.GetImageUrl(x.LogoPath),
+                    MemberCount = x.Users.Count(c => !c.IsDeleted),
+                    Type = "community"
+                }).ToListAsync();
+
+            var users = await _userRepository.GetAll().Where(x =>
+                    x.IsDeleted == false && x.Username.Contains(text) || x.EmailAddress.Contains(text))
+                .Select(x => new SearchDto
+                {
+                    Id = x.Id,
+                    LogoPath = BlobService.BlobService.GetImageUrl(x.ProfileImagePath),
+                    Name = x.Username,
+                    Type = "user"
+                }).ToListAsync();
+
+            var result = coms.Union(users).ToList();
+            return result;
         }
     }
 }

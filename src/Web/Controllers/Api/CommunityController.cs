@@ -51,6 +51,13 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
+        public async Task<IActionResult> Search(string text)
+        {
+            var result = await _communityAppService.Search(text);
+            return Ok(result);
+        }
+        
+        [HttpGet]
         public async Task<IActionResult> Users(Guid id)
         {
             var result = await _communityAppService.Users(id);
