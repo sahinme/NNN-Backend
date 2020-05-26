@@ -24,6 +24,5 @@ namespace Microsoft.Nnn.ApplicationCore.Interfaces
         Task<bool> SendResetCode(string emailAddress);
         Task<bool> ResetPassword(ResetPasswordDto input);
         Task<bool> ChangePassword(ChangePasswordDto input);
-
     }
 }

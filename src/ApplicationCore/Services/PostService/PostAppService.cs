@@ -236,7 +236,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 Value = input.Value
             };
             await _postVoteRepository.AddAsync(model);
-
             // notificaiton
             var user = await _userRepository.GetByIdAsync(input.UserId);
             var post = await _postRepository.GetByIdAsync(input.PostId);
