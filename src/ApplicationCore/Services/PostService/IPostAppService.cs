@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
+using Microsoft.Nnn.ApplicationCore.Services.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostService.Dto;
 
@@ -16,6 +17,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         Task DeleteModerator(ModeratorDeleteDto input);
         Task<List<UserPostsDto>> GetUserPosts(IdOrUsernameDto input);
         Task<List<GetAllPostDto>> HomePosts(Guid userId);
+        Task<PagedResultDto<GetAllPostDto>> PagedHomePosts(PaginationParams input);
         Task<List<GetAllPostDto>> UnauthorizedHomePosts();
         Task<PostVote> Vote(CreateVoteDto input);
     }

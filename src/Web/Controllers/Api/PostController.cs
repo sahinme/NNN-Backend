@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
+using Microsoft.Nnn.ApplicationCore.Services.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
 using Microsoft.Nnn.ApplicationCore.Services.PostService.Dto;
@@ -43,6 +44,13 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         public async Task<IActionResult> HomePosts(Guid userId)
         {
             var post = await _postAppService.HomePosts(userId);
+            return Ok(post);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> PagedHomePosts([FromQuery] PaginationParams input)
+        {
+            var post = await _postAppService.PagedHomePosts(input);
             return Ok(post);
         }
         

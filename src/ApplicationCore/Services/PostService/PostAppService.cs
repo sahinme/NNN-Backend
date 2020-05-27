@@ -16,6 +16,7 @@ using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CommentService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService.Dto;
@@ -280,7 +281,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         {    
                             Id = p.User.Id,
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(p.User.ProfileImagePath),
-                            UserName = p.User.Username
+                            UserName = p.User.Username    
                         },
                         CommentsCount = p.Comments.Count(c=>c.IsDeleted==false)
                     }).OrderByDescending(p=>p.Id).ToList()
@@ -297,6 +298,55 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 }
             }
             return posts;
+
+        }
+
+          public async Task<PagedResultDto<GetAllPostDto>> PagedHomePosts(PaginationParams input)
+        {
+            var result = await  _communityUserRepository.GetAll().Where(x => x.UserId == input.EntityId && x.IsDeleted==false )
+                .Include(x => x.Community).ThenInclude(x => x.Posts)
+                .Select(x => new Example
+                {
+                    Posts = x.Community.Posts.Where(p=>p.IsDeleted==false).Select(p => new GetAllPostDto
+                    {
+                        Id = p.Id,
+                        Content = p.Content,
+                        ContentType = p.ContentType,
+                        LinkUrl = p.LinkUrl,
+                        VoteCount = p.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - p.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
+                        UserPostVote = p.Votes.FirstOrDefault(l=>l.UserId== input.EntityId && l.IsDeleted==false && l.PostId==p.Id ),
+                        MediaContentPath = BlobService.BlobService.GetImageUrl(p.MediaContentPath),
+                        CreatedDateTime = p.CreatedDate,
+                        Community = new PostCommunityDto
+                        {
+                            Id = x.Community.Id,
+                            Name = x.Community.Name,
+                            LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
+                        },
+                        User = new PostUserDto
+                        {    
+                            Id = p.User.Id,
+                            ProfileImagePath = BlobService.BlobService.GetImageUrl(p.User.ProfileImagePath),
+                            UserName = p.User.Username    
+                        },
+                        CommentsCount = p.Comments.Count(c=>c.IsDeleted==false)
+                    }).OrderByDescending(p=>p.Id).ToList()
+                }).ToListAsync();
+
+            //if (result.Count == 0) return await UnauthorizedHomePosts();
+            
+            var posts = new List<GetAllPostDto>();
+            foreach (var item in result)
+            {
+                foreach (var post in item.Posts)
+                {
+                    posts.Add(post);
+                }
+            }
+            var aa = posts.Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).ToList();
+            var hasNext = posts.Skip((input.PageNumber) * input.PageSize).Any();
+            var bb = new PagedResultDto<GetAllPostDto> {Results = aa , HasNext = hasNext};
+            return bb;
 
         }
 
