@@ -55,6 +55,13 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
+        public async Task<IActionResult> PagedUnauthorizedHomePost([FromQuery] PaginationParams input)
+        {
+            var post = await _postAppService.PagedUnauthorizedHomePosts(input);
+            return Ok(post);
+        }
+        
+        [HttpGet]
         public async Task<IActionResult>  UnauthorizedHomePost()
         {
             var result = await _postAppService.UnauthorizedHomePosts();

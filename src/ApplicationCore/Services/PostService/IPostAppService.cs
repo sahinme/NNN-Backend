@@ -18,6 +18,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         Task<List<UserPostsDto>> GetUserPosts(IdOrUsernameDto input);
         Task<List<GetAllPostDto>> HomePosts(Guid userId);
         Task<PagedResultDto<GetAllPostDto>> PagedHomePosts(PaginationParams input);
+        Task<PagedResultDto<GetAllPostDto>> PagedUnauthorizedHomePosts(PaginationParams input);
         Task<List<GetAllPostDto>> UnauthorizedHomePosts();
         Task<PostVote> Vote(CreateVoteDto input);
     }

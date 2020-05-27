@@ -380,5 +380,38 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     }).ToListAsync();
             return result;
         }
+        
+        public async Task<PagedResultDto<GetAllPostDto>> PagedUnauthorizedHomePosts(PaginationParams input)
+        {
+            var result = await _postRepository.GetAll().Where(x => x.IsDeleted == false)
+                .Include(x=>x.User)
+                .Include(x=>x.Community).Select(
+                    x => new GetAllPostDto
+                    {
+                        Id = x.Id,
+                        Content = x.Content,
+                        LinkUrl = x.LinkUrl,
+                        VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
+                        MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
+                        ContentType = x.ContentType,
+                        CreatedDateTime = x.CreatedDate,
+                        CommentsCount = x.Comments.Count,
+                        Community = new PostCommunityDto
+                        {
+                            Id = x.Community.Id,
+                            Name = x.Community.Name,
+                            LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
+                        },
+                        User = new PostUserDto
+                        {
+                            Id = x.User.Id,
+                            UserName = x.User.Username,
+                            ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath)
+                        }
+                    }).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).ToListAsync();
+            var hasNext = await _postRepository.GetAll().Where(x => x.IsDeleted == false).Skip((input.PageNumber) * input.PageSize).AnyAsync();
+            var bb = new PagedResultDto<GetAllPostDto> {Results = result , HasNext = hasNext};
+            return bb;
+        }
     }
 }
