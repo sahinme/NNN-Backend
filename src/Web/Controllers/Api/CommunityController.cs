@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.Dto;
 
 namespace Microsoft.Nnn.Web.Controllers.Api
 {
@@ -40,6 +41,13 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         public async Task<IActionResult> Get(Guid id,Guid userId)
         {
             var result = await _communityAppService.GetById(id,userId);
+            return Ok(result);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetPosts([FromQuery] PaginationParams input)
+        {
+            var result = await _communityAppService.GetPosts(input);
             return Ok(result);
         }
         

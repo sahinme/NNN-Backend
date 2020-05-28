@@ -333,7 +333,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     }).OrderByDescending(p=>p.Id).ToList()
                 }).ToListAsync();
 
-            //if (result.Count == 0) return await UnauthorizedHomePosts();
+            if (result.Count == 0) return await PagedUnauthorizedHomePosts(input);
             
             var posts = new List<GetAllPostDto>();
             foreach (var item in result)
@@ -408,7 +408,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                             UserName = x.User.Username,
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath)
                         }
-                    }).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).ToListAsync();
+                    }).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).OrderByDescending(x=>x.Id).ToListAsync();
             var hasNext = await _postRepository.GetAll().Where(x => x.IsDeleted == false).Skip((input.PageNumber) * input.PageSize).AnyAsync();
             var bb = new PagedResultDto<GetAllPostDto> {Results = result , HasNext = hasNext};
             return bb;

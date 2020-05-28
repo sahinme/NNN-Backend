@@ -17,8 +17,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.Dto
         /// <summary> 
         /// The total number of pages available. 
         /// </summary> 
-        public int TotalNumberOfPages { get; set; } 
-    
+        public int TotalNumberOfPages { get; set; }
+
         /// <summary> 
         /// The total number of records available. 
         /// </summary> 

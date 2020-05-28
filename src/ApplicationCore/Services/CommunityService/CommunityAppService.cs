@@ -10,6 +10,7 @@ using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
@@ -157,8 +158,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                         ProfileImg = BlobService.BlobService.GetImageUrl(m.User.ProfileImagePath)
                     }).ToList()
                 }).FirstOrDefaultAsync();
+            return result;
+        }
 
-            var posts = await _postRepository.GetAll().Where(x => x.IsDeleted==false && x.CommunityId == id)
+        public async Task<PagedResultDto<CommunityPostDto>> GetPosts(PaginationParams input)
+        {
+            var posts = await _postRepository.GetAll().Where(x => x.IsDeleted==false && x.CommunityId == input.EntityId)
                 .Include(x => x.Comments).ThenInclude(x => x.Replies)
                 .Include(x => x.User).Select(x => new CommunityPostDto
                 {
@@ -169,7 +174,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     ContentType = x.ContentType,
                     CreatedDateTime = x.CreatedDate,
                     UserPostVote = x.Votes.FirstOrDefault(p=>p.IsDeleted==false &&
-                                                             p.UserId == userId  && p.PostId==x.Id ),
+                                                             p.UserId == input.UserId  && p.PostId==x.Id ),
                     VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
                     CommentsCount = x.Comments.Count,
                     User = new PostUserDto
@@ -178,9 +183,11 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                         ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath),
                         UserName = x.User.Username
                     },
-                }).OrderByDescending(x=>x.Id).ToListAsync();
-            result.Posts = posts;
-            return result;
+                }).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).OrderByDescending(x=>x.Id).ToListAsync();
+            var hasNext = await _postRepository.GetAll().Where(x => x.IsDeleted==false && x.CommunityId == input.EntityId)
+                .Skip((input.PageNumber) * input.PageSize).AnyAsync();
+            var bb = new PagedResultDto<CommunityPostDto> {Results = posts ,  HasNext = hasNext};
+            return bb;
         }
 
         public async Task<List<GetAllCommunityDto>> GetPopulars(Guid? userId)

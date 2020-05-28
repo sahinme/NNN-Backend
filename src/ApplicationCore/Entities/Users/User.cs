@@ -23,9 +23,6 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Users
 
         [MaxLength(181)]
         public string Bio { get; set; }
-
-        public long Coin { get; set; }
-
         public string VerificationCode { get; set; }
         public string ResetPasswordCode { get; set; }
         [DefaultValue(false)]
