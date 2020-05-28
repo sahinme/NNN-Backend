@@ -28,7 +28,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Users
         [DefaultValue(false)]
         public bool EmailVerified { get; set; }
         private DateTime? _expirationDate = null;
-        public DateTime ExpirationDate
+        public DateTime ExpirationDate    
         {
             get
             {
