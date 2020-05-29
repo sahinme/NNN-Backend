@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Conversations;
 using Microsoft.Nnn.ApplicationCore.Entities.Messages;
+using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.ConversationService;
 using Microsoft.Nnn.ApplicationCore.Services.ConversationService.Dto;
@@ -13,15 +14,17 @@ namespace Microsoft.Nnn.ApplicationCore.Services.MessageService
     public class MessageAppService:IMessageAppService
     {
         private readonly IAsyncRepository<Message> _messageRepository;
-        private readonly IAsyncRepository<Conversation> _conversationRepository;
+        private readonly IAsyncRepository<User> _userRepository;
         private readonly IConversationAppService _conversationAppService;
+        private readonly IEmailSender _emailSender;
 
         public MessageAppService(IAsyncRepository<Message> messageRepository,IConversationAppService conversationAppService,
-            IAsyncRepository<Conversation> conversationRepository)
+            IAsyncRepository<User> userRepository,IEmailSender emailSender)
         {
             _messageRepository = messageRepository;
             _conversationAppService = conversationAppService;
-            _conversationRepository = conversationRepository;
+            _userRepository = userRepository;
+            _emailSender = emailSender;
         }
         
         public async Task<Message> Create(CreateMessageDto input)
@@ -50,6 +53,15 @@ namespace Microsoft.Nnn.ApplicationCore.Services.MessageService
                 ConversationId = input.ConversationId
             };
             await _messageRepository.AddAsync(model);
+            
+            // email send
+            var haveUnread = await _messageRepository.GetAll()
+                .AnyAsync(x => x.IsRead == false && x.ReceiverId == input.ReceiverId);
+            if (haveUnread) return model;
+            var receiver = await _userRepository.GetByIdAsync(input.ReceiverId);
+            var sender = await _userRepository.GetByIdAsync(input.SenderId);
+            var emailBody = sender.Username + " isimli kullanıcı size mesaj gönderdi";
+            await _emailSender.SendEmail(receiver.EmailAddress, "Yeni mesajınız var", emailBody);
             return model;
         }
 

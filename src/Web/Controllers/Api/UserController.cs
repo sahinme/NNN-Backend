@@ -47,7 +47,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                 var user = await _userService.CreateUser(input);
                 if (user.Id != Guid.Empty)
                 {
-                    var subject = "http:saalla.com/" + user.VerificationCode;
+                    var subject = "http://localhost:3000/#/verify/" + user.VerificationCode;
                     await _emailSender.SendEmail(user.EmailAddress, "E-posta onaylama", subject);
                 }
 

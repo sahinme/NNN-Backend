@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto;
@@ -23,6 +24,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             return Ok(result);
         }
         
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

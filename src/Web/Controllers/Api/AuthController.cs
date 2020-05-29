@@ -35,5 +35,12 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             return Ok(new {status = result});
         }
         
+        [HttpPost]
+        public async Task<IActionResult> Verify(string code)
+        {
+            var result = await _userService.VerifyEmail(code);
+            return Ok(new {status = result});
+        }
+        
     }
 }

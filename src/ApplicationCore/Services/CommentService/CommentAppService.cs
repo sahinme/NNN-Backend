@@ -23,9 +23,11 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
         private readonly IAsyncRepository<Community> _communityRepository;
         private readonly IAsyncRepository<User> _userRepository;
         private readonly IAsyncRepository<Post> _postRepository;
+        private readonly IEmailSender _emailSender;
         public CommentAppService(IAsyncRepository<Comment> commentRepository,IAsyncRepository<CommentLike> commentLikeRepository,
             IAsyncRepository<Notification> notificationRepository,IAsyncRepository<User> userRepository,
-            IAsyncRepository<Post> postRepository,IAsyncRepository<Community> communityRepository)
+            IAsyncRepository<Post> postRepository,IAsyncRepository<Community> communityRepository,
+            IEmailSender emailSender)
         {
             _commentRepository = commentRepository;
             _commentLikeRepository = commentLikeRepository;
@@ -33,6 +35,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
             _userRepository = userRepository;
             _postRepository = postRepository;
             _communityRepository = communityRepository;
+            _emailSender = emailSender;
         }
         
         public async Task<Comment> CreateComment(CreateCommentDto input)
@@ -61,8 +64,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
                OwnerUserId = post.UserId
            };
            await _notificationRepository.AddAsync(notify);
-
-           return comment;
+            // email send
+            var commentCount = post.Comments.Count(x => x.IsDeleted == false);
+            if (commentCount != 0 && commentCount != 20 && commentCount != 50 && commentCount != 100) return comment;
+            var url = "https://saalla.com/#/p/" + post.User.Username + "/" + post.Id;
+            var message = commentCount + " kişi gönderine salladı :"+url;
+            var subject = "Gönderine sallıyorlar";
+            await _emailSender.SendEmail(post.User.EmailAddress, subject, message);
+            return comment;
         }
 
         public async Task<List<CommentDto>> GetPostComments(Guid postId)

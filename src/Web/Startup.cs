@@ -17,9 +17,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using System.Text;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Nnn.ApplicationCore.Entities.EmailSettings;
@@ -33,11 +36,14 @@ using Microsoft.Nnn.ApplicationCore.Services.ConversationService;
 using Microsoft.Nnn.ApplicationCore.Services.MessageService;
 using Microsoft.Nnn.ApplicationCore.Services.NotificationService;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
+using Microsoft.Nnn.ApplicationCore.Services.RealNotify;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService;
 using Microsoft.Nnn.ApplicationCore.Services.UserService;
 using Microsoft.Nnn.Infrastructure.Data;
 using Microsoft.Nnn.Infrastructure.Logging;
 using Microsoft.Nnn.Infrastructure.Services;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 
 namespace Microsoft.Nnn.Web
 {
@@ -84,11 +90,6 @@ namespace Microsoft.Nnn.Web
                 builder.AllowCredentials();
             }));
             
-            services.AddSignalR(options => 
-            { 
-                options.EnableDetailedErrors = true; 
-            }); 
-
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
             services.AddScoped<IPostAppService, PostAppService>();
@@ -122,20 +123,33 @@ namespace Microsoft.Nnn.Web
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = Configuration["Issuer"],
                         ValidAudience = Configuration["Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SigningKey"])),
+                        ValidateIssuer = false,
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(Configuration.GetValue<string>("SigningKey"))
+                        ),
+                    };
+                    jwtBearerOptions.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/notifications")))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
             
-            
-            // configure token generation
-            services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddEntityFrameworkStores<NnnContext>()
-                .AddDefaultTokenProviders();
-    
-            // configure identity options
-            services.Configure<IdentityOptions>(o => {
-                o.SignIn.RequireConfirmedEmail = true;
+            services.AddSignalR().AddJsonProtocol(options =>
+            {
+                options.PayloadSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                options.PayloadSerializerSettings.Converters.Add(new StringEnumConverter());
             });
+            services.AddSingleton<IUserIdProvider, UserIdProvider>();
             
             // Add memory cache services
             services.AddMemoryCache();
@@ -208,14 +222,12 @@ namespace Microsoft.Nnn.Web
         {
             app.UseCors("MyPolicy");
             
-            app.UseSignalR(routes =>
+            app.UseSignalR(routes => 
             {
-                routes.MapHub<ChatHub>("/chat");
+                routes.MapHub<NotificationsHub>("/notifications");
             });
             
-            
-            
-            app.UseIdentity();
+            app.UseAuthentication();
 
             //app.UseDeveloperExceptionPage();
             app.UseHealthChecks("/health",

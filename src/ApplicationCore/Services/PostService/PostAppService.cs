@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Nnn.ApplicationCore.Entities.Comments;
 using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations;
 using Microsoft.Nnn.ApplicationCore.Entities.Notifications;
-using Microsoft.Nnn.ApplicationCore.Entities.PostCategories;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
-using Microsoft.Nnn.ApplicationCore.Entities.PostTags;
 using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
@@ -31,6 +28,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         private readonly IAsyncRepository<ModeratorOperation> _moderatorOperationRepository;
         private readonly IAsyncRepository<User> _userRepository;
         private readonly IAsyncRepository<Notification> _notificationRepository;
+        private readonly IEmailSender _emailSender;
         private readonly IBlobService _blobService;
         private readonly IAsyncRepository<Community> _communityRepository;
 
@@ -41,6 +39,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             IAsyncRepository<PostVote> postVoteRepository,
             IAsyncRepository<ModeratorOperation> moderatorOperationRepository,
             IAsyncRepository<Notification> notificationRepository,
+            IEmailSender emailSender,
             IAsyncRepository<User> userRepository)
         {
             _postRepository = postRepository;
@@ -51,6 +50,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _communityRepository = communityRepository;
+            _emailSender = emailSender;
         }
         
         public async Task<Post> CreatePost(CreatePostDto input)
@@ -252,6 +252,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 ImgPath = user.ProfileImagePath
             };
             await _notificationRepository.AddAsync(notify);
+            //email send
+            var voteCount = post.Votes.Count(x => x.IsDeleted == false);
+            if (voteCount == 1 || voteCount == 10 || voteCount == 50 || voteCount == 100)
+            {
+                var subject = "Sallaman oylanıyor.";
+                var url = "https://saalla.com/#/p/" + post.User.Username + "/" + post.Id;
+                await _emailSender.SendEmail(post.User.EmailAddress, subject, "Sallamanı " + voteCount + " kişi oyladı :"+url);
+            }
             return model;
         }
         

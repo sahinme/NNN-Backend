@@ -38,11 +38,12 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                 {
                     return NotFound();
                 }
- 
+                var userData = await _userService.GetByUsername(request.Username);
                 var claims = new[]
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, request.Username),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.Name, request.Username)
                 };
  
                 var token = new JwtSecurityToken
@@ -56,8 +57,6 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                         SecurityAlgorithms.HmacSha256)
                 );
 
-                var userData = await _userService.GetByUsername(request.Username);
-                
                 return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token),success=true,user=userData });
             }
             return BadRequest();
