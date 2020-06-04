@@ -11,6 +11,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CategoryService
     {
         Task<Category> CreateCategory(CreateCategoryDto input);
         Task<List<CategoryDto>> GetAllCategories();
-        Task<List<GetAllCommunityDto>> GetCommunitiesByCategory(Guid categoryId,Guid? userId);
+        Task<List<GetAllCommunityDto>> GetCommunitiesByCategory(string name);
     }
 }

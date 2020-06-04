@@ -38,6 +38,7 @@ using Microsoft.Nnn.ApplicationCore.Services.NotificationService;
 using Microsoft.Nnn.ApplicationCore.Services.PostService;
 using Microsoft.Nnn.ApplicationCore.Services.RealNotify;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService;
+using Microsoft.Nnn.ApplicationCore.Services.SuggestionService;
 using Microsoft.Nnn.ApplicationCore.Services.UserService;
 using Microsoft.Nnn.Infrastructure.Data;
 using Microsoft.Nnn.Infrastructure.Logging;
@@ -100,6 +101,7 @@ namespace Microsoft.Nnn.Web
             services.AddScoped<IConversationAppService, ConversationAppService>();
             services.AddScoped<INotificationAppService, NotificationAppService>();
             services.AddScoped<IMessageAppService, MessageAppService>();
+            services.AddScoped<ISuggestionAppService, SuggestionAppService>();
             services.AddScoped<ICommunityAppService, CommunityAppService>();
             services.AddScoped<IBlobService, BlobService>();
             services.Configure<CatalogSettings>(Configuration);
@@ -127,20 +129,6 @@ namespace Microsoft.Nnn.Web
                         IssuerSigningKey = new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(Configuration.GetValue<string>("SigningKey"))
                         ),
-                    };
-                    jwtBearerOptions.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = context =>
-                        {
-                            var accessToken = context.Request.Query["access_token"];
-
-                            var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/notifications")))
-                            {
-                                context.Token = accessToken;
-                            }
-                            return Task.CompletedTask;
-                        }
                     };
                 });
             

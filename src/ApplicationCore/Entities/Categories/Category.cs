@@ -8,5 +8,6 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Categories
     public class Category:BaseEntity,IAggregateRoot
     {
         public string DisplayName { get; set; }
+        public string Slug { get; set; }
     }
 }

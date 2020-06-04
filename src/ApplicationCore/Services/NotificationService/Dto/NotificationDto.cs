@@ -9,6 +9,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.NotificationService.Dto
         public Guid Id { get; set; }
         public NotifyContentType Type { get; set; }
         public string Content { get; set; }
+        public DateTime CreatedDate { get; set; }
         public Guid TargetId { get; set; }
         public string TargetName { get; set; }
         public string ImgPath { get; set; }

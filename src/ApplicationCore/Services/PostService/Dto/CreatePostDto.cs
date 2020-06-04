@@ -8,7 +8,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
     {
         public string Content { get; set; }
         public IFormFile ContentFile { get; set; }
-        public Guid CommunityId { get; set; }
+        public string CommunitySlug { get; set; }
         public Guid UserId { get; set; }
         public ContentType ContentType { get; set; }
 

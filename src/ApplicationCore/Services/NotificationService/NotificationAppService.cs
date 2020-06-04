@@ -28,10 +28,11 @@ namespace Microsoft.Nnn.ApplicationCore.Services.NotificationService
                     Content = x.Content,
                     TargetId = x.TargetId,
                     TargetName = x.TargetName,
+                    CreatedDate = x.CreatedDate,
                     IsRead = x.IsRead,
                     ImgPath = BlobService.BlobService.GetImageUrl(x.ImgPath),
                     Type = x.Type,
-                }).ToListAsync();
+                }).OrderByDescending(x=>x.CreatedDate).ToListAsync();
             return result;
         }
 

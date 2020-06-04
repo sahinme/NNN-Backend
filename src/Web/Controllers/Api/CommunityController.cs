@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.Dto;
+using Microsoft.Nnn.Web.Identity;
 
 namespace Microsoft.Nnn.Web.Controllers.Api
 {
@@ -17,14 +18,19 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             _communityAppService = communityAppService;
         }
         
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateCommunity([FromForm] CreateCommunity input)
         {
+            var token = GetToken();
+            var userType = LoginHelper.GetClaim(token, "UserRole");
+            if (userType != "Admin") return Unauthorized();
+            
             var result = await _communityAppService.CreateCommunity(input);
             return Ok(result);
         }
         
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -33,16 +39,27 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> OfModerators(Guid userId)
+        public async Task<IActionResult> OfModerators()
         {
-            var result = await _communityAppService.OfModerators(userId);
+            var token = GetToken();
+            var userId = LoginHelper.GetClaim(token, "UserId");
+            
+            var result = await _communityAppService.OfModerators(Guid.Parse(userId));
             return Ok(result);
         }
         
-        [HttpGet("by-id")]
-        public async Task<IActionResult> Get(Guid id,Guid userId)
+        [HttpGet]
+        public async Task<IActionResult> Get(string slug)
         {
-            var result = await _communityAppService.GetById(id,userId);
+            var token = GetToken();
+            string userId = null;
+            if ( !string.IsNullOrEmpty(token) )
+            {
+                 userId = LoginHelper.GetClaim(token, "UserId");
+
+            }
+            
+            var result = await _communityAppService.GetById(slug,userId == null ? Guid.Empty : Guid.Parse(userId));
             return Ok(result);
         }
         
@@ -68,15 +85,23 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> Users(Guid id)
+        public async Task<IActionResult> Users(string slug)
         {
-            var result = await _communityAppService.Users(id);
+            var result = await _communityAppService.Users(slug);
             return Ok(result);
         }
         
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> Update([FromForm] UpdateCommunity input)
         {
+            var token = GetToken();
+            var userId = LoginHelper.GetClaim(token, "UserId");
+
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId)) return Unauthorized();
+            
+            input.ModeratorId = Guid.Parse(userId);
+            
             var result = await _communityAppService.Update(input);
             return Ok(result);
         }

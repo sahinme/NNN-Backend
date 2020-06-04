@@ -24,6 +24,8 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Users
         [MaxLength(181)]
         public string Bio { get; set; }
         public string VerificationCode { get; set; }
+        [DefaultValue(false)]
+        public bool IsAdmin { get; set; }
         public string ResetPasswordCode { get; set; }
         [DefaultValue(false)]
         public bool EmailVerified { get; set; }

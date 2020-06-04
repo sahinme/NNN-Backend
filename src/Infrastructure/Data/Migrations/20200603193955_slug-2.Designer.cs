@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Nnn.Infrastructure.Data;
 
 namespace Microsoft.Nnn.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(NnnContext))]
-    partial class NnnContextModelSnapshot : ModelSnapshot
+    [Migration("20200603193955_slug-2")]
+    partial class slug2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -436,8 +438,6 @@ namespace Microsoft.Nnn.Infrastructure.Data.Migrations
                     b.Property<string>("ModifiedBy");
 
                     b.Property<DateTime>("ModifiedDate");
-
-                    b.Property<string>("Slug");
 
                     b.Property<Guid>("UserId");
 

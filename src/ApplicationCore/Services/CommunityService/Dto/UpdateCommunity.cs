@@ -5,7 +5,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
 {
     public class UpdateCommunity
     {
-        public Guid Id { get; set; }
+        public string Slug { get; set; }
         public string Name { get; set; }
         public IFormFile Logo { get; set; }
         public IFormFile CoverPhoto { get; set; }

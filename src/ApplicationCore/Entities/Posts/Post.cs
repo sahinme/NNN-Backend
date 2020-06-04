@@ -13,6 +13,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Posts
     {
         public string Content { get; set; }
         public string MediaContentPath { get; set; }
+        public string Slug { get; set; }
         public ContentType ContentType { get; set; }
         public Guid UserId { get; set; }
         public Guid CommunityId { get; set; }

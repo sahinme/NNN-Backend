@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Nnn.ApplicationCore.Services.NotificationService;
 using Microsoft.Nnn.ApplicationCore.Services.NotificationService.Dto;
+using Microsoft.Nnn.Web.Identity;
 
 namespace Microsoft.Nnn.Web.Controllers.Api
 {
@@ -16,16 +17,22 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetUser(Guid userId)
+        public async Task<IActionResult> GetUser()
         {
-            var result = await _notificationAppService.GetUserNotifications(userId);
+            var token = GetToken();
+            var userId = LoginHelper.GetClaim(token, "UserId");
+
+            var result = await _notificationAppService.GetUserNotifications(Guid.Parse(userId));
             return Ok(result);
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetCount(Guid userId)
+        public async Task<IActionResult> GetCount()
         {
-            var result = await _notificationAppService.GetUnReads(userId);
+            var token = GetToken();
+            var userId = LoginHelper.GetClaim(token, "UserId");
+
+            var result = await _notificationAppService.GetUnReads(Guid.Parse(userId));
             return Ok(new { count=result });
         }
 

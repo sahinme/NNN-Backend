@@ -12,11 +12,11 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
         Task<Community> CreateCommunity(CreateCommunity input);
         Task<List<GetAllCommunityDto>> GetAll();
         Task<Community> Update(UpdateCommunity input);
-        Task<CommunityDto> GetById(Guid id,Guid? userId);
+        Task<CommunityDto> GetById(string slug,Guid? userId);
         Task<PagedResultDto<CommunityPostDto>> GetPosts(PaginationParams input);
         Task<List<GetAllCommunityDto>> GetPopulars(Guid? userId);
         Task<List<GetAllCommunityDto>> OfModerators(Guid userId);
-        Task<List<CommunityUserDto>> Users(Guid id);
+        Task<List<CommunityUserDto>> Users(string slug);
         Task<List<SearchDto>> Search(string text);
     }
 }

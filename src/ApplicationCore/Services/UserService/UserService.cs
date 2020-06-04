@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.ModeratorOperations;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
@@ -18,6 +19,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
     {
         private readonly IAsyncRepository<User> _userRepository;
         private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
+        private readonly IAsyncRepository<Community> _communityRepository;
         private readonly IAsyncRepository<ModeratorOperation> _moderatorOperationRepository;
         private readonly IBlobService _blobService;
         private readonly IEmailSender _emailSender;
@@ -26,6 +28,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             IAsyncRepository<User> userRepository,IBlobService blobService,
             IAsyncRepository<CommunityUser> communityUserRepository,
             IAsyncRepository<ModeratorOperation> moderatorOperationRepository,
+            IAsyncRepository<Community> communityRepository,
             IEmailSender emailSender
             )
         {
@@ -33,6 +36,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             _blobService = blobService;
             _communityUserRepository = communityUserRepository;
             _moderatorOperationRepository = moderatorOperationRepository;
+            _communityRepository = communityRepository;
             _emailSender = emailSender;
         }
         
@@ -79,7 +83,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             {
                 Id = x.Id,
                 Username = x.Username,
-                EmailAddress = x.EmailAddress,
                 Bio = x.Bio,
                 Gender = x.Gender,
                 ProfileImagePath = x.ProfileImagePath == null ? null : BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
@@ -94,11 +97,18 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 Id = x.Id,
                 Username = x.Username,
                 Bio = x.Bio,
-                EmailAddress = x.EmailAddress,
                 Gender = x.Gender,
                 ProfileImagePath = x.ProfileImagePath == null ? null : BlobService.BlobService.GetImageUrl(x.ProfileImagePath)
             }).FirstOrDefaultAsync();
 
+            var comMods = new List<string>();
+            comMods = await _communityUserRepository.GetAll()
+                .Where(x => x.UserId == user.Id && x.IsAdmin && x.IsDeleted == false)
+                .Select(x=>x.Community.Slug)
+                .ToListAsync();
+
+            user.ComMods = comMods;
+            
             var isModerator = await _communityUserRepository.GetAll().AnyAsync(x =>
                 x.IsDeleted == false && x.Suspended == false && x.IsAdmin && x.UserId == user.Id);
             user.IsModerator = isModerator;
@@ -193,7 +203,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 .FirstOrDefaultAsync(x => x.Username == input.Username);
             if (user == null)
             {
-                throw new Exception("Böyle bir kullanıcı bulunamadı!");
+                return false;
             }
             var decodedPassword = SecurePasswordHasherHelper.Verify(input.Password, user.Password);
             return decodedPassword;
@@ -206,29 +216,32 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
             await _userRepository.UpdateAsync(user);
         }
 
-        public async Task<CommunityUser> JoinCommunity(Guid userId, Guid communityId)
+        public async Task<CommunityUser> JoinCommunity(Guid userId, string slug)
         {
             var isExist = await _communityUserRepository.GetAll()
-                .Where(x => x.IsDeleted == false && x.UserId==userId && x.CommunityId==communityId )
+                .Where(x => x.IsDeleted == false && x.UserId==userId && x.Community.Slug == slug )
                 .FirstOrDefaultAsync();
             if (isExist != null)
             {
                 throw new Exception("bu islem zaten yapilmis");
             }
+
+            var community = await _communityRepository.GetAll().FirstOrDefaultAsync(x => x.Slug == slug);
             var model = new CommunityUser
             {
                 UserId = userId,
-                CommunityId = communityId
+                CommunityId = community.Id
             };
             await _communityUserRepository.AddAsync(model);
             return model;
         }
         
-        public async Task LeaveFromCommunity(Guid userId, Guid communityId)
+        public async Task LeaveFromCommunity(Guid userId, string slug)
         {
             var isExist = await _communityUserRepository.GetAll()
-                .Where(x => x.CommunityId == communityId && x.UserId == userId && x.IsDeleted == false )
+                .Where(x => x.Community.Slug == slug && x.UserId == userId && x.IsDeleted == false )
                 .FirstOrDefaultAsync();
+            
             if (isExist == null) throw new Exception("this relation don`t exist");
             isExist.IsDeleted = true;
             await _communityUserRepository.UpdateAsync(isExist);
@@ -259,7 +272,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 .Where(x => x.UserId == userId && x.IsDeleted == false && x.Suspended == false)
                 .Include(x => x.Community).Select(x => new GetAllCommunityDto
                 {
-                    Id = x.Community.Id,
+                    Slug = x.Community.Slug,
                     Name = x.Community.Name,
                     Description = x.Community.Description,
                     LogoPath = x.Community.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.Community.LogoPath),

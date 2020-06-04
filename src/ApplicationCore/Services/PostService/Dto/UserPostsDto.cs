@@ -20,7 +20,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
 
     public class PostCommunityDto
     {
-        public Guid Id { get; set; }
+        public string Slug { get; set; }
         public string Name { get; set; }
         public string LogoPath { get; set; }
     }

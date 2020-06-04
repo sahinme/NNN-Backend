@@ -31,7 +31,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities
             {
                 return _createdDate.HasValue
                     ? _createdDate.Value
-                    : DateTime.UtcNow;
+                    : DateTime.Now;
             }
 
             set { _createdDate = value; }

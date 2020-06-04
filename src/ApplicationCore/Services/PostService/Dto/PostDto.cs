@@ -10,6 +10,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
     public class PostDto
     {
         public Guid Id { get; set; }
+        public string Slug { get; set; }
         public string Content { get; set; }
         public string ContentPath { get; set; }
         public ContentType ContentType { get; set; }
@@ -25,7 +26,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
 
     public class PostUserDto
     {
-        public Guid Id { get; set; }
         public string UserName { get; set; }
         public string ProfileImagePath { get; set; }
     }

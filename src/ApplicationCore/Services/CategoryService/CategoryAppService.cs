@@ -8,6 +8,7 @@ using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.CategoryService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.UserService;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.CategoryService
 {
@@ -24,9 +25,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CategoryService
         
         public async Task<Category> CreateCategory(CreateCategoryDto input)
         {
+            var slug = input.DisplayName.GenerateSlug();
+            
             var category = new Category
             {
-                DisplayName = input.DisplayName
+                DisplayName = input.DisplayName,
+                Slug = slug
             };
             await _categoryRepository.AddAsync(category);
             return category;
@@ -36,30 +40,31 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CategoryService
         {
             var result = await _categoryRepository.GetAll().Where(x => x.IsDeleted == false).Select(x => new CategoryDto
             {
-                Id = x.Id,
+                Slug = x.Slug,
                 DisplayName = x.DisplayName
             }).ToListAsync();
             return result;
         }
 
-        public async Task<List<GetAllCommunityDto>> GetCommunitiesByCategory(Guid categoryId,Guid? userId)
+        public async Task<List<GetAllCommunityDto>> GetCommunitiesByCategory(string name)
         {
+            var category = await _categoryRepository.GetAll().FirstOrDefaultAsync(x => !x.IsDeleted && x.Slug == name);
             var communities = await _communityRepository.GetAll()
-                .Where(x => x.IsDeleted == false && x.CategoryId == categoryId)
+                .Where(x => x.IsDeleted == false && x.CategoryId == category.Id)
                 .Include(x=>x.Category)
-                .Include(x => x.Users).Select(x => new GetAllCommunityDto
+                .Include(x => x.Users).ThenInclude(x=>x.User).Select(x => new GetAllCommunityDto
                 {
-                    Id = x.Id,
+                    Slug = x.Slug,
                     Name = x.Name,
                     Description = x.Description,
                     Category = new CategoryDto
                     {
-                        Id = x.Category.Id,
+                        Slug = x.Slug,
                         DisplayName = x.Category.DisplayName
                     },
                     LogoPath = BlobService.BlobService.GetImageUrl(x.LogoPath),
                     MemberCount = x.Users.Count(m => m.IsDeleted==false),
-                    IsUserJoined = x.Users.Any(u => u.IsDeleted == false && u.UserId == userId)
+                    //IsUserJoined = x.Users.Any(u => u.IsDeleted == false && u.UserId == userId)
                 }).ToListAsync();
             return communities;
         }

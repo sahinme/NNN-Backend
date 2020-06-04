@@ -17,6 +17,7 @@ using Microsoft.Nnn.ApplicationCore.Services.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.ReplyService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.UserService;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.PostService
 {
@@ -55,12 +56,15 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         
         public async Task<Post> CreatePost(CreatePostDto input)
         {
+            var com = await _communityRepository.GetAll().FirstOrDefaultAsync(x => x.Slug == input.CommunitySlug);
+            var slug = input.Content.GenerateSlug();
             var post = new Post
             {
                Content = input.Content,
-               CommunityId = input.CommunityId,
+               CommunityId = com.Id,
                UserId = input.UserId,
-               ContentType = input.ContentType
+               ContentType = input.ContentType,
+               Slug = slug
             };
             
             if (input.ContentFile != null)
@@ -87,6 +91,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 .Select(x => new PostDto
                 {
                     Id = x.Id,
+                    Slug = x.Slug,
                     Content = x.Content,
                     LinkUrl = x.LinkUrl,
                     ContentType = x.ContentType,
@@ -95,13 +100,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     CreatedDateTime = x.CreatedDate,
                     Community = new PostCommunityDto
                     {
-                        Id = x.Community.Id,
+                        Slug = x.Community.Slug,
                         Name = x.Community.Name,
                         LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                     },
                     UserInfo = new PostUserDto
                     {
-                        Id = x.User.Id,
                         UserName = x.User.Username,
                         ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath)
                     },
@@ -189,15 +193,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         public async Task<List<UserPostsDto>> GetUserPosts(IdOrUsernameDto input)
         {
             var result = await _postRepository.GetAll().
-                Where(x => x.IsDeleted == false && (x.User.Username == input.Username || x.UserId == input.Id)).
+                Where(x => x.IsDeleted == false && x.User.Username == input.Username).
                 Include(x=>x.Community).Select(
                 x => new UserPostsDto
                 {
                     Id = x.Id,
                     Content = x.Content,
                     LinkUrl = x.LinkUrl,
-                    UserPostVote = x.Votes.FirstOrDefault(p=>p.IsDeleted==false &&
-                                                             (p.UserId == input.Id || p.User.Username == input.Username) && p.PostId==x.Id ),
+                    UserPostVote = x.Votes.FirstOrDefault(p=>p.IsDeleted==false && p.UserId == input.Id  && p.PostId==x.Id ),
                     MediaContentPath = x.MediaContentPath == null ? null : BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     ContentType = x.ContentType,
                     CreatedDateTime = x.CreatedDate,
@@ -205,7 +208,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     CommentsCount = x.Comments.Count,
                     Community = new PostCommunityDto
                     {
-                        Id = x.Community.Id,
+                        Slug = x.Community.Slug,
                         Name = x.Community.Name,
                         LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                     }
@@ -241,23 +244,25 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             var user = await _userRepository.GetByIdAsync(input.UserId);
             var post = await _postRepository.GetByIdAsync(input.PostId);
             var community = await _communityRepository.GetByIdAsync(post.CommunityId);
-            if (post.UserId == user.Id) return model;
-            var notify = new Notification
+            if (post.UserId != user.Id)
             {
-                TargetId = input.PostId,
-                OwnerUserId = post.UserId,
-                TargetName = community.Name,
-                Type = NotifyContentType.PostVote,
-                Content = user.Username + " " + "sallamanı oyladı",
-                ImgPath = user.ProfileImagePath
-            };
-            await _notificationRepository.AddAsync(notify);
+                var notify = new Notification
+                {
+                    TargetId = input.PostId,
+                    OwnerUserId = post.UserId,
+                    TargetName = community.Name,
+                    Type = NotifyContentType.PostVote,
+                    Content = user.Username + " " + "sallamanı oyladı",
+                    ImgPath = user.ProfileImagePath
+                };
+                await _notificationRepository.AddAsync(notify);
+            }
             //email send
             var voteCount = post.Votes.Count(x => x.IsDeleted == false);
             if (voteCount == 1 || voteCount == 10 || voteCount == 50 || voteCount == 100)
             {
                 var subject = "Sallaman oylanıyor.";
-                var url = "https://saalla.com/#/p/" + post.User.Username + "/" + post.Id;
+                var url = "https://saalla.com/#/p/" + community.Name + "/" + post.Id;
                 await _emailSender.SendEmail(post.User.EmailAddress, subject, "Sallamanı " + voteCount + " kişi oyladı :"+url);
             }
             return model;
@@ -272,6 +277,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     Posts = x.Community.Posts.Where(p=>p.IsDeleted==false).Select(p => new GetAllPostDto
                     {
                         Id = p.Id,
+                        Slug = p.Slug,
                         Content = p.Content,
                         ContentType = p.ContentType,
                         LinkUrl = p.LinkUrl,
@@ -281,13 +287,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         CreatedDateTime = p.CreatedDate,
                         Community = new PostCommunityDto
                         {
-                            Id = x.Community.Id,
+                            Slug = x.Community.Slug,
                             Name = x.Community.Name,
                             LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                         },
                         User = new PostUserDto
                         {    
-                            Id = p.User.Id,
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(p.User.ProfileImagePath),
                             UserName = p.User.Username    
                         },
@@ -303,7 +308,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 foreach (var post in item.Posts)
                 {
                     posts.Add(post);
-                }
+                }    
             }
             return posts;
 
@@ -318,27 +323,28 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     Posts = x.Community.Posts.Where(p=>p.IsDeleted==false).Select(p => new GetAllPostDto
                     {
                         Id = p.Id,
+                        Slug = p.Slug,
                         Content = p.Content,
                         ContentType = p.ContentType,
                         LinkUrl = p.LinkUrl,
+                        PageNumber = input.PageNumber,
                         VoteCount = p.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - p.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
                         UserPostVote = p.Votes.FirstOrDefault(l=>l.UserId== input.EntityId && l.IsDeleted==false && l.PostId==p.Id ),
                         MediaContentPath = BlobService.BlobService.GetImageUrl(p.MediaContentPath),
                         CreatedDateTime = p.CreatedDate,
                         Community = new PostCommunityDto
                         {
-                            Id = x.Community.Id,
+                            Slug = x.Community.Slug,
                             Name = x.Community.Name,
                             LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                         },
                         User = new PostUserDto
                         {    
-                            Id = p.User.Id,
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(p.User.ProfileImagePath),
                             UserName = p.User.Username    
                         },
                         CommentsCount = p.Comments.Count(c=>c.IsDeleted==false)
-                    }).OrderByDescending(p=>p.Id).ToList()
+                    }).ToList()
                 }).ToListAsync();
 
             if (result.Count == 0) return await PagedUnauthorizedHomePosts(input);
@@ -351,7 +357,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     posts.Add(post);
                 }
             }
-            var aa = posts.Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).ToList();
+
+            var aa = posts.OrderByDescending(x=>x.CreatedDateTime).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).ToList();
             var hasNext = posts.Skip((input.PageNumber) * input.PageSize).Any();
             var bb = new PagedResultDto<GetAllPostDto> {Results = aa , HasNext = hasNext};
             return bb;
@@ -375,13 +382,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         CommentsCount = x.Comments.Count,
                         Community = new PostCommunityDto
                         {
-                            Id = x.Community.Id,
+                            Slug = x.Community.Slug,
                             Name = x.Community.Name,
                             LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                         },
                         User = new PostUserDto
                         {
-                            Id = x.User.Id,
                             UserName = x.User.Username,
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath)
                         }
@@ -397,8 +403,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     x => new GetAllPostDto
                     {
                         Id = x.Id,
+                        Slug = x.Slug,
                         Content = x.Content,
                         LinkUrl = x.LinkUrl,
+                        UserPostVote = x.Votes.FirstOrDefault(l=>l.UserId== input.EntityId && l.IsDeleted==false && l.PostId==x.Id ),
                         VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
                         MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                         ContentType = x.ContentType,
@@ -406,17 +414,16 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         CommentsCount = x.Comments.Count,
                         Community = new PostCommunityDto
                         {
-                            Id = x.Community.Id,
+                           Slug = x.Community.Slug,
                             Name = x.Community.Name,
                             LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                         },
                         User = new PostUserDto
                         {
-                            Id = x.User.Id,
                             UserName = x.User.Username,
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath)
                         }
-                    }).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).OrderByDescending(x=>x.Id).ToListAsync();
+                    }).OrderByDescending(x=>x.CreatedDateTime).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).ToListAsync();
             var hasNext = await _postRepository.GetAll().Where(x => x.IsDeleted == false).Skip((input.PageNumber) * input.PageSize).AnyAsync();
             var bb = new PagedResultDto<GetAllPostDto> {Results = result , HasNext = hasNext};
             return bb;

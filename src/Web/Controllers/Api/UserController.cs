@@ -1,8 +1,16 @@
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
+using Microsoft.Nnn.ApplicationCore.Services.SuggestionService;
+using Microsoft.Nnn.ApplicationCore.Services.SuggestionService.Dto;
+using Microsoft.Nnn.Web.Identity;
 using Nnn.ApplicationCore.Services.UserService.Dto;
 
 namespace Microsoft.Nnn.Web.Controllers.Api
@@ -11,13 +19,15 @@ namespace Microsoft.Nnn.Web.Controllers.Api
     {
         private readonly IUserService _userService;
         private readonly IEmailSender _emailSender;
+        private readonly ISuggestionAppService _suggestionAppService;
 
         public UserController(IUserService userService,
-                IEmailSender emailSender
+                IEmailSender emailSender,ISuggestionAppService suggestionAppService
             )
         {
             _userService = userService;
             _emailSender = emailSender;
+            _suggestionAppService = suggestionAppService;
         }
 
         [HttpGet("by-id")]
@@ -28,9 +38,16 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetByUsername(string username)
+        public async Task<IActionResult> Get(string username)
         {
             var result = await _userService.GetByUsername(username);
+            return Ok(result);
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> Suggestion(SuggestionCreate input)
+        {
+            var result = await _suggestionAppService.Create(input);
             return Ok(result);
         }
         
@@ -47,7 +64,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                 var user = await _userService.CreateUser(input);
                 if (user.Id != Guid.Empty)
                 {
-                    var subject = "http://localhost:3000/#/verify/" + user.VerificationCode;
+                    var subject = "https://saalla.com/#/verify/" + user.VerificationCode;
                     await _emailSender.SendEmail(user.EmailAddress, "E-posta onaylama", subject);
                 }
 
@@ -55,8 +72,9 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                 user.VerificationCode = null;
                 if (user.Id == Guid.Empty)
                     return Ok(new
-                        {user, error = true});
-                return Ok(user);
+                        {user.EmailAddress,user.Username, error = true});
+                
+                return Ok( new {success=true});
             }
             catch (Exception e)
             {
@@ -67,52 +85,78 @@ namespace Microsoft.Nnn.Web.Controllers.Api
            
         }
         
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> JoinCommunity(Guid userId,Guid communityId)
+        public async Task<IActionResult> JoinCommunity(string slug)
         {
-            var result = await _userService.JoinCommunity(userId, communityId);
+            var token = GetToken();
+            var userId = LoginHelper.GetClaim(token, "UserId");
+
+            
+            var result = await _userService.JoinCommunity(Guid.Parse(userId), slug);
             return Ok(result);
         }
         
+        [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetUserCommunities(Guid userId)
+        public async Task<IActionResult> GetUserCommunities()
         {
-            var result = await _userService.GetUserCommunities(userId);
+            var token = GetToken();
+            var userId = LoginHelper.GetClaim(token, "UserId");
+            
+            var result = await _userService.GetUserCommunities(Guid.Parse(userId));
             return Ok(result);
         }
         
+        [Authorize]
         [HttpDelete]
-        public async Task<IActionResult> LeaveFromCommunity(Guid userId,Guid communityId)
+        public async Task<IActionResult> LeaveFromCommunity(string slug)
         {
-            await _userService.LeaveFromCommunity(userId, communityId);
+            var token = GetToken();
+            var userId = LoginHelper.GetClaim(token, "UserId");
+            
+            await _userService.LeaveFromCommunity(Guid.Parse(userId), slug);
             return Ok();
         }
 
+        [Authorize]
         [HttpDelete]
         public async Task<IActionResult> ModeratorRejectedJoin(ModeratorRejected input)
         {
+            var token = GetToken();
+            var userId = LoginHelper.GetClaim(token, "UserId");
+
+            if (input.ModeratorId != Guid.Parse(userId)) return Unauthorized();
+            
             await _userService.ModeratorRejectedJoin(input);
             return Ok();
         }
         
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto input)
         {
+            var token = GetToken();
+            var userId = LoginHelper.GetClaim(token, "UserId");
+
+            if (string.IsNullOrEmpty(token)) return Unauthorized();
+            input.Id = Guid.Parse(userId);
             await _userService.UpdateUser(input);
             return Ok();
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteUser(Guid id)
-        {
-            await _userService.DeleteUser(id);
-            return Ok();
-        }
+//        [Authorize]
+//        [HttpDelete]
+//        public async Task<IActionResult> DeleteUser(Guid id)
+//        {
+//            await _userService.DeleteUser(id);
+//            return Ok();
+//        }
 
-        [HttpPost]
-        public async Task EmailSend(string email, string subject, string message)
-        {
-            await _emailSender.SendEmail(email, subject, message);
-        }
+//        [HttpPost]
+//        public async Task EmailSend(string email, string subject, string message)
+//        {
+//            await _emailSender.SendEmail(email, subject, message);
+//        }
     }
 }

@@ -14,8 +14,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService.Dto
     public class GetAllPostDto
     {
         public Guid Id { get; set; }
+        public string Slug { get; set; }
         public string Content { get; set; }
         public string MediaContentPath { get; set; }
+        public int PageNumber { get; set; }
         public ContentType ContentType { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public long CommentsCount { get; set; }
