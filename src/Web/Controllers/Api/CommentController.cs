@@ -30,6 +30,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             _commentAppService = commentAppService;
             _commentRepository = commentRepository;
             _communityUserRepository = communityUserRepository;
+            _operationRepository = operationRepository;
             _postRepository = postRepository;
         }
         
@@ -43,7 +44,8 @@ namespace Microsoft.Nnn.Web.Controllers.Api
              input.UserId = Guid.Parse(userId);
              
              var result = await _commentAppService.CreateComment(input);
-             return Ok(result);
+             bool status = result.Id != Guid.Empty;
+             return Ok(new{status});
          }
 
         [HttpGet]
@@ -90,7 +92,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                 var user = await _communityUserRepository.GetAll()
                     .FirstOrDefaultAsync(x =>
                         x.IsAdmin && !x.IsDeleted && x.CommunityId == post.CommunityId &&
-                        x.UserId == Guid.Parse(userId));
+                        x.UserId == Guid.Parse(userId));    
                 if (user == null) return Unauthorized();
                 await _commentAppService.Delete(id);
                 var operation = new ModeratorOperation
