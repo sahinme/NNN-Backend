@@ -165,7 +165,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             var isModerator = await _communityUserRepository.GetAll()
                 .FirstOrDefaultAsync(x =>
                     x.IsDeleted == false && x.IsAdmin && x.UserId == input.ModeratorId &&
-                    x.CommunityId == input.CommunityId);
+                    x.Community.Slug == input.Slug);
             
             if (isModerator == null)
             {
@@ -176,14 +176,17 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 .FirstOrDefaultAsync(x => x.IsDeleted == false && x.Id == input.PostId);
             if(post==null) throw new Exception("Post bulunamadi");
             
+            
             post.IsDeleted = true;
             await _postRepository.UpdateAsync(post);
+
+            var com = await _communityRepository.GetAll().FirstOrDefaultAsync(x => x.Slug == input.Slug);
 
             var model = new ModeratorOperation
             {
                 Operation = "POST_DELETED",
                 ModeratorId = input.ModeratorId,
-                CommunityId = input.CommunityId,
+                CommunityId = com.Id,
                 PostId = input.PostId
             };
             await _moderatorOperationRepository.AddAsync(model);
@@ -198,6 +201,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 x => new UserPostsDto
                 {
                     Id = x.Id,
+                    Slug = x.Slug,
                     Content = x.Content,
                     LinkUrl = x.LinkUrl,
                     UserPostVote = x.Votes.FirstOrDefault(p=>p.IsDeleted==false && p.UserId == input.Id  && p.PostId==x.Id ),
@@ -242,7 +246,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             await _postVoteRepository.AddAsync(model);
             // notificaiton
             var user = await _userRepository.GetByIdAsync(input.UserId);
-            var post = await _postRepository.GetByIdAsync(input.PostId);
+            var post = await _postRepository.GetAll().Where(x => x.IsDeleted == false && x.Id == input.PostId)
+                .Include(x => x.Votes).FirstOrDefaultAsync();
             var community = await _communityRepository.GetByIdAsync(post.CommunityId);
             if (post.UserId != user.Id)
             {
@@ -250,7 +255,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 {
                     TargetId = input.PostId,
                     OwnerUserId = post.UserId,
-                    TargetName = community.Name,
+                    TargetName = community.Slug+"/"+post.Slug,
                     Type = NotifyContentType.PostVote,
                     Content = user.Username + " " + "sallamanı oyladı",
                     ImgPath = user.ProfileImagePath
@@ -411,6 +416,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                         ContentType = x.ContentType,
                         CreatedDateTime = x.CreatedDate,
+                        PageNumber = input.PageNumber,
                         CommentsCount = x.Comments.Count,
                         Community = new PostCommunityDto
                         {

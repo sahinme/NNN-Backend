@@ -50,7 +50,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
 
            // notify
            var user = await _userRepository.GetByIdAsync(input.UserId);
-           var post = await _postRepository.GetByIdAsync(input.PostId);
+           var post = await _postRepository.GetAll().Where(x => x.IsDeleted == false && x.Id == input.PostId)
+               .Include(x => x.Comments).FirstOrDefaultAsync();
            var community = await _communityRepository.GetByIdAsync(post.CommunityId);
 
            if (post.UserId == user.Id) return comment;
@@ -60,12 +61,12 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
                ImgPath = user.ProfileImagePath,
                Type = NotifyContentType.PostComment,
                TargetId = post.Id,
-               TargetName = community.Name,
+               TargetName = community.Slug+"/"+post.Slug,
                OwnerUserId = post.UserId
            };
            await _notificationRepository.AddAsync(notify);
             // email send
-            var commentCount = post.Comments.Count(x => x.IsDeleted == false);
+            var commentCount =  post.Comments.Count(c=>!c.IsDeleted);
             if (commentCount != 0 && commentCount != 20 && commentCount != 50 && commentCount != 100) return comment;
             var url = "https://saalla.com/#/p/" + community.Name + "/" + post.Id;
             var message = commentCount + " kişi gönderine salladı :"+url;
@@ -148,7 +149,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
                 Content = user.Username + " " + "sallamanı beğendi : " + comment.Content,
                 TargetId = post.Id,
                 ImgPath = user.ProfileImagePath,
-                TargetName = community.Name,
+                TargetName = community.Slug+"/"+post.Slug,
                 OwnerUserId = comment.UserId,
                 Type = NotifyContentType.CommentLike
             };

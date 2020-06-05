@@ -53,7 +53,8 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         {
             var token = GetToken();
             string userId = null;
-            if ( !string.IsNullOrEmpty(token) )
+            bool isTokenEmpty = String.IsNullOrEmpty(token);
+            if ( !isTokenEmpty )
             {
                  userId = LoginHelper.GetClaim(token, "UserId");
 
@@ -64,8 +65,19 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetPosts([FromQuery] PaginationParams input)
+        public async Task<IActionResult> GetPosts([FromQuery] PageDtoCommunity input)
         {
+            var token = GetToken();
+            string userId = null;
+            bool isTokenEmpty = String.IsNullOrEmpty(token);
+            if ( !isTokenEmpty )
+            {
+                userId = LoginHelper.GetClaim(token, "UserId");
+
+            }
+
+            if (userId != null) input.UserId = Guid.Parse(userId);
+            
             var result = await _communityAppService.GetPosts(input);
             return Ok(result);
         }

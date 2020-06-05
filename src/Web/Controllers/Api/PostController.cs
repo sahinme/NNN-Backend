@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
@@ -18,11 +20,14 @@ namespace Microsoft.Nnn.Web.Controllers.Api
     {
         private readonly IPostAppService _postAppService;
         private readonly IAsyncRepository<Post> _postRepository;
+        private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
 
-        public PostController(IPostAppService postAppService, IAsyncRepository<Post> postRepository )
+        public PostController(IPostAppService postAppService, IAsyncRepository<Post> postRepository,
+            IAsyncRepository<CommunityUser> communityUserRepository)
         {
             _postAppService = postAppService;
             _postRepository = postRepository;
+            _communityUserRepository = communityUserRepository;
         }
 
         [Authorize]
@@ -49,7 +54,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             {  userId = LoginHelper.GetClaim(token, "UserId");
             }
             
-            var post = await _postAppService.GetPostById(status,Guid.Parse(userId));
+            var post = await _postAppService.GetPostById(status, userId == null ? Guid.Empty : Guid.Parse(userId));
             return Ok(post);
         }
         
@@ -58,7 +63,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         public async Task<IActionResult> GetUserPosts([FromQuery] IdOrUsernameDto input)
         {
             var token = GetToken();
-            if (token != "null")
+            if (!String.IsNullOrEmpty(token))
             {
                 var userId = LoginHelper.GetClaim(token, "UserId");
                 input.Id = Guid.Parse(userId);
@@ -81,6 +86,15 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         [HttpGet]
         public async Task<IActionResult> PagedHomePosts([FromQuery] PaginationParams input)
         {
+            var token = GetToken();
+            if (!String.IsNullOrEmpty(token))
+            {
+                var userId = LoginHelper.GetClaim(token, "UserId");
+                input.EntityId = Guid.Parse(userId);
+            }
+
+            if (input.EntityId == null) return Unauthorized();
+            
             var post = await _postAppService.PagedHomePosts(input);
             return Ok(post);
         }
@@ -119,9 +133,16 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         public async Task<IActionResult> ModeratorDelete(ModeratorDeleteDto input)
         {
             var token = GetToken();
-            var userId = LoginHelper.GetClaim(token, "UserId");
+            if (!String.IsNullOrEmpty(token))
+            {
+                var loggedUserId = LoginHelper.GetClaim(token, "UserId");
+                input.ModeratorId = Guid.Parse(loggedUserId);
+            }
 
-            if (input.ModeratorId != Guid.Parse(userId)) return Unauthorized();
+            var isAdmin = await _communityUserRepository.GetAll()
+                .FirstOrDefaultAsync(x =>
+                    x.IsDeleted == false && x.IsAdmin && x.UserId == input.ModeratorId && x.Community.Slug == input.Slug);
+            if (isAdmin == null) return Unauthorized();
             
             await _postAppService.DeleteModerator(input);
             return Ok();
@@ -137,7 +158,8 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             if (input.UserId != Guid.Parse(userId)) return Unauthorized();
             
             var result = await _postAppService.Vote(input);
-            return Ok(result);
+            var success = result.Id != Guid.Empty;
+            return Ok(new {success});
         }
     }
 }

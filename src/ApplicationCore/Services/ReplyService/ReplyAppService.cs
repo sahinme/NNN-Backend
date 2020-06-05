@@ -63,7 +63,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
                 Content = user.Username + " " + "yorumuna yanıt verdi: " + input.Content,
                 OwnerUserId = comment.UserId,
                 Type = NotifyContentType.CommentReply,
-                TargetName = community.Name,
+                TargetName = community.Slug+"/"+post.Slug,
                 ImgPath = user.ProfileImagePath,
                 TargetId = post.Id
             };
@@ -99,7 +99,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.ReplyService
                 OwnerUserId = reply.UserId,
                 Type = NotifyContentType.ReplyLike,
                 ImgPath = user.ProfileImagePath,
-                TargetName = community.Name,
+                TargetName = community.Slug+"/"+post.Slug ,
                 TargetId = post.Id
             };
             await _notificationRepository.AddAsync(notify);

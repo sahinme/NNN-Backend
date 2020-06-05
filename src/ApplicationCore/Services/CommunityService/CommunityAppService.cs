@@ -172,13 +172,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             return result;
         }
 
-        public async Task<PagedResultDto<CommunityPostDto>> GetPosts(PaginationParams input)
+        public async Task<PagedResultDto<CommunityPostDto>> GetPosts(PageDtoCommunity input)
         {
-            var posts = await _postRepository.GetAll().Where(x => x.IsDeleted==false && x.CommunityId == input.EntityId)
+            var posts = await _postRepository.GetAll().Where(x => x.IsDeleted==false && x.Community.Slug == input.Slug)
                 .Include(x => x.Comments).ThenInclude(x => x.Replies)
                 .Include(x => x.User).Select(x => new CommunityPostDto
                 {
                     Id = x.Id,
+                    Slug = x.Slug,
                     Content = x.Content,
                     PageNumber = input.PageNumber,
                     LinkUrl = x.LinkUrl,
@@ -195,7 +196,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                         UserName = x.User.Username
                     },
                 }).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).OrderByDescending(x=>x.Id).ToListAsync();
-            var hasNext = await _postRepository.GetAll().Where(x => x.IsDeleted==false && x.CommunityId == input.EntityId)
+            var hasNext = await _postRepository.GetAll().Where(x => x.IsDeleted==false && x.Community.Slug == input.Slug)
                 .Skip((input.PageNumber) * input.PageSize).AnyAsync();
             var bb = new PagedResultDto<CommunityPostDto> {Results = posts ,  HasNext = hasNext};
             return bb;

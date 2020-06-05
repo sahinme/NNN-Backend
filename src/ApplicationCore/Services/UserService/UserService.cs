@@ -250,18 +250,24 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
         public async Task ModeratorRejectedJoin(ModeratorRejected input)
         {
             var isExist = await _communityUserRepository.GetAll()
-                .Where(x => x.CommunityId == input.CommunityId && x.UserId == input.UserId && x.IsDeleted == false )
+                .Where(x => x.Community.Slug == input.Slug && x.User.Username == input.Username && x.IsDeleted == false )
                 .FirstOrDefaultAsync();
             if (isExist == null) throw new Exception("this relation don`t exist");
+
+            var community = await _communityRepository.GetAll()
+                .FirstOrDefaultAsync(x => x.Slug == input.Slug && !x.IsDeleted);
+
+            var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Username == input.Username);
+            
             isExist.IsDeleted = true;
             await _communityUserRepository.UpdateAsync(isExist);
 
             var model = new ModeratorOperation
             {
                 Operation = "USER_REJECTED",
-                CommunityId = input.CommunityId,
+                CommunityId = community.Id,
                 ModeratorId = input.ModeratorId,
-                UserId = input.UserId
+                UserId = user.Id
             };
             await _moderatorOperationRepository.AddAsync(model);
         }

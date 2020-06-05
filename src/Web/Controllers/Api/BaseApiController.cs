@@ -9,7 +9,12 @@ namespace Microsoft.Nnn.Web.Controllers.Api
     {
         protected string GetToken()
         {
-           return Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+            string value = Request.Headers[HeaderNames.Authorization];
+            if (value == "Bearer null")
+            {
+                return "";
+            }
+            return value.Replace("Bearer ","");
         }
     }
 }

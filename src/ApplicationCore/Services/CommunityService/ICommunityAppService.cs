@@ -13,7 +13,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
         Task<List<GetAllCommunityDto>> GetAll();
         Task<Community> Update(UpdateCommunity input);
         Task<CommunityDto> GetById(string slug,Guid? userId);
-        Task<PagedResultDto<CommunityPostDto>> GetPosts(PaginationParams input);
+        Task<PagedResultDto<CommunityPostDto>> GetPosts(PageDtoCommunity input);
         Task<List<GetAllCommunityDto>> GetPopulars(Guid? userId);
         Task<List<GetAllCommunityDto>> OfModerators(Guid userId);
         Task<List<CommunityUserDto>> Users(string slug);

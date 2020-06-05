@@ -7,6 +7,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto
     public class UserPostsDto
     {
         public Guid Id { get; set; }
+        public string Slug { get; set; }
         public string Content { get; set; }
         public string MediaContentPath { get; set; }
         public string LinkUrl { get; set; }

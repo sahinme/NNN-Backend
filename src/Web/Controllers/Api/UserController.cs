@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
+using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
 using Microsoft.Nnn.ApplicationCore.Services.SuggestionService;
@@ -20,14 +22,16 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         private readonly IUserService _userService;
         private readonly IEmailSender _emailSender;
         private readonly ISuggestionAppService _suggestionAppService;
+        private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
 
         public UserController(IUserService userService,
-                IEmailSender emailSender,ISuggestionAppService suggestionAppService
+                IEmailSender emailSender,ISuggestionAppService suggestionAppService,IAsyncRepository<CommunityUser> communityUserRepository
             )
         {
             _userService = userService;
             _emailSender = emailSender;
             _suggestionAppService = suggestionAppService;
+            _communityUserRepository = communityUserRepository;
         }
 
         [HttpGet("by-id")]
@@ -124,9 +128,16 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         public async Task<IActionResult> ModeratorRejectedJoin(ModeratorRejected input)
         {
             var token = GetToken();
-            var userId = LoginHelper.GetClaim(token, "UserId");
+            if (!String.IsNullOrEmpty(token))
+            {
+                 var loggedUserId = LoginHelper.GetClaim(token, "UserId");
+                 input.ModeratorId = Guid.Parse(loggedUserId);
+            }
 
-            if (input.ModeratorId != Guid.Parse(userId)) return Unauthorized();
+            var isAdmin = await _communityUserRepository.GetAll()
+                .FirstOrDefaultAsync(x =>
+                    x.IsDeleted == false && x.IsAdmin && x.UserId == input.ModeratorId && x.Community.Slug == input.Slug);
+            if (isAdmin == null) return Unauthorized();
             
             await _userService.ModeratorRejectedJoin(input);
             return Ok();
