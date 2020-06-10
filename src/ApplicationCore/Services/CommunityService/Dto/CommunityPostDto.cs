@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.PostVotes;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.PostService.Dto;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
 {
@@ -15,7 +17,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto
         public int PageNumber { get; set; }
         public DateTime CreatedDateTime { get; set; }
         public string LinkUrl { get; set; }
-        public long CommentsCount { get; set; }
+        public List<Comment> Comments { get; set; }
         public PostVote UserPostVote { get; set; }
         public long VoteCount { get; set; }
         public PostUserDto User { get; set; }

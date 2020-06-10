@@ -121,7 +121,7 @@ namespace Microsoft.Nnn.Web
                     {
                         ValidateActor = true,
                         ValidateAudience = true,
-                        ValidateLifetime = true,
+                        ValidateLifetime = false,
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = Configuration["Issuer"],
                         ValidAudience = Configuration["Audience"],

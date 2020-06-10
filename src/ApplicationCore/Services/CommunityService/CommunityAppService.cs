@@ -13,6 +13,7 @@ using Microsoft.Nnn.ApplicationCore.Services.BlobService;
 using Microsoft.Nnn.ApplicationCore.Services.CommunityService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.PostAppService.Dto;
+using Microsoft.Nnn.ApplicationCore.Services.PostService.Dto;
 using Microsoft.Nnn.ApplicationCore.Services.UserService;
 
 namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
@@ -189,7 +190,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     UserPostVote = x.Votes.FirstOrDefault(p=>p.IsDeleted==false &&
                                                              p.UserId == input.UserId  && p.PostId==x.Id ),
                     VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
-                    CommentsCount = x.Comments.Count,
+                    Comments = x.Comments.Where(f=>f.IsDeleted==false).Select(f=> new Comment
+                    {
+                        ReplyCount = f.Replies.Count(v=>v.IsDeleted==false)
+                    }).ToList(),
                     User = new PostUserDto
                     {
                         ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath),

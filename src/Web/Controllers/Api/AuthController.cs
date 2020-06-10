@@ -51,7 +51,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
                 issuer: _configuration["Issuer"], 
                 audience: _configuration["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(30), // 30 gün geçerli olacak
+                //expires: DateTime.UtcNow.AddDays(30), // 30 gün geçerli olacak
                 notBefore: DateTime.UtcNow,
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SigningKey"])),//appsettings.json içerisinde bulunan signingkey değeri
                     SecurityAlgorithms.HmacSha256)

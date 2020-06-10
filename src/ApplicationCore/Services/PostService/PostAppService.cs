@@ -209,7 +209,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     ContentType = x.ContentType,
                     CreatedDateTime = x.CreatedDate,
                     VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
-                    CommentsCount = x.Comments.Count,
+                    Comments = x.Comments.Where(f=>f.IsDeleted==false).Select(f=> new Comment
+                    {
+                        ReplyCount = f.Replies.Count(v=>v.IsDeleted==false)
+                    }).ToList(),
                     Community = new PostCommunityDto
                     {
                         Slug = x.Community.Slug,
@@ -301,7 +304,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(p.User.ProfileImagePath),
                             UserName = p.User.Username    
                         },
-                        CommentsCount = p.Comments.Count(c=>c.IsDeleted==false)
+                        Comments = p.Comments.Where(f=>f.IsDeleted==false).Select(f=> new Comment
+                        {
+                            ReplyCount = f.Replies.Count(v=>v.IsDeleted==false)
+                        }).ToList()
                     }).OrderByDescending(p=>p.Id).ToList()
                 }).ToListAsync();
 
@@ -348,7 +354,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                             ProfileImagePath = BlobService.BlobService.GetImageUrl(p.User.ProfileImagePath),
                             UserName = p.User.Username    
                         },
-                        CommentsCount = p.Comments.Count(c=>c.IsDeleted==false)
+                        Comments = p.Comments.Where(f=>f.IsDeleted==false).Select(f=> new Comment
+                        {
+                            ReplyCount = f.Replies.Count(v=>v.IsDeleted==false)
+                        }).ToList()
                     }).ToList()
                 }).ToListAsync();
 
@@ -384,7 +393,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                         ContentType = x.ContentType,
                         CreatedDateTime = x.CreatedDate,
-                        CommentsCount = x.Comments.Count,
+                        Comments = x.Comments.Where(f=>f.IsDeleted==false).Select(f=> new Comment
+                        {
+                            ReplyCount = f.Replies.Count(v=>v.IsDeleted==false)
+                        }).ToList(),
                         Community = new PostCommunityDto
                         {
                             Slug = x.Community.Slug,
@@ -417,7 +429,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         ContentType = x.ContentType,
                         CreatedDateTime = x.CreatedDate,
                         PageNumber = input.PageNumber,
-                        CommentsCount = x.Comments.Count,
+                        Comments = x.Comments.Where(f=>f.IsDeleted==false).Select(f=> new Comment
+                        {
+                            ReplyCount = f.Replies.Count(v=>v.IsDeleted==false)
+                        }).ToList(),
                         Community = new PostCommunityDto
                         {
                            Slug = x.Community.Slug,
