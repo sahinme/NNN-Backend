@@ -12,7 +12,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
     public interface IPostAppService
     {
         Task<Post> CreatePost(CreatePostDto input);
-        Task<PostDto> GetPostById(Guid id,Guid? userId);
+        Task<PostDto> GetPostById(string slug,Guid? userId);
         Task Delete(Guid id);
         Task DeleteModerator(ModeratorDeleteDto input);
         Task<List<UserPostsDto>> GetUserPosts(IdOrUsernameDto input);
@@ -21,5 +21,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         Task<PagedResultDto<GetAllPostDto>> PagedUnauthorizedHomePosts(PaginationParams input);
         Task<List<GetAllPostDto>> UnauthorizedHomePosts();
         Task<PostVote> Vote(CreateVoteDto input);
+        Task<List<string>> GetAllPostsSlug();
     }
 }

@@ -58,6 +58,13 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         {
             var com = await _communityRepository.GetAll().FirstOrDefaultAsync(x => x.Slug == input.CommunitySlug);
             var slug = input.Content.GenerateSlug();
+            var hasSlug = await _postRepository.GetAll()
+                .FirstOrDefaultAsync(x => x.IsDeleted == false && x.Slug == slug);
+            if (hasSlug != null)
+            {
+                var newContent = input.Content + "" + RandomString.GenerateString(3);
+                slug = newContent.GenerateSlug();
+            }
             var post = new Post
             {
                Content = input.Content,
@@ -82,9 +89,9 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             return post;
         }
 
-        public async Task<PostDto> GetPostById(Guid id,Guid? userId)
+        public async Task<PostDto> GetPostById(string slug,Guid? userId)
         {
-            var post = await _postRepository.GetAll().Where(x => x.Id == id).Include(x => x.User)
+            var post = await _postRepository.GetAll().Where(x => x.Slug == slug).Include(x => x.User)
                 .Include(x=>x.Comments).ThenInclude(x=>x.Replies).ThenInclude(x=>x.ParentReply)
                 .ThenInclude(x=>x.User)
                 .Include(x=>x.Comments).ThenInclude(x=>x.Likes)
@@ -267,15 +274,21 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             }
             //email send
             var voteCount = post.Votes.Count(x => x.IsDeleted == false);
-            if (voteCount == 1 || voteCount == 10 || voteCount == 50 || voteCount == 100)
+            if (voteCount == 1 || voteCount == 3 || voteCount==10 || voteCount == 50 || voteCount == 100)
             {
                 var subject = "Sallaman oylanıyor.";
-                var url = "https://saalla.com/#/p/" + community.Name + "/" + post.Id;
+                var url = "https://saalla.com/p/" + community.Name + "/" + post.Id;
                 await _emailSender.SendEmail(post.User.EmailAddress, subject, "Sallamanı " + voteCount + " kişi oyladı :"+url);
             }
             return model;
         }
-        
+
+        public async Task<List<string>> GetAllPostsSlug()
+        {
+            var slugs = await _postRepository.GetAll().Where(x => x.IsDeleted == false).Select(x => x.Slug).ToListAsync();
+            return slugs;
+        }
+
         public async Task<List<GetAllPostDto>> HomePosts(Guid userId)
         {
             var result = await  _communityUserRepository.GetAll().Where(x => x.UserId == userId && x.IsDeleted==false )
@@ -378,6 +391,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             return bb;
 
         }
+          
+        
 
         public async Task<List<GetAllPostDto>> UnauthorizedHomePosts()
         {

@@ -54,10 +54,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.MessageService
             };
             await _messageRepository.AddAsync(model);
             
-            // email send
-            var haveUnread = await _messageRepository.GetAll()
-                .AnyAsync(x => x.IsRead == false && x.ReceiverId == input.ReceiverId);
-            if (haveUnread) return model;
             var receiver = await _userRepository.GetByIdAsync(input.ReceiverId);
             var sender = await _userRepository.GetByIdAsync(input.SenderId);
             var emailBody = sender.Username + " isimli kullanıcı size mesaj gönderdi";

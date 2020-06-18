@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
+using Microsoft.Nnn.ApplicationCore.Services.PostService;
 using Microsoft.Nnn.ApplicationCore.Services.SuggestionService;
 using Microsoft.Nnn.Web.Identity;
 
@@ -14,14 +15,16 @@ namespace Microsoft.Nnn.Web.Controllers.Api
     {
         private readonly ISuggestionAppService _suggestionAppService;
         private readonly IUserService _userAppService;
+        private readonly IPostAppService _postAppService;
         private readonly IAsyncRepository<User> _userRepo;
 
         public AdminController(ISuggestionAppService suggestionAppService,IUserService userAppService,
-            IAsyncRepository<User> userRepo)
+            IAsyncRepository<User> userRepo,IPostAppService postAppService)
         {
             _suggestionAppService = suggestionAppService;
             _userAppService = userAppService;
             _userRepo = userRepo;
+            _postAppService = postAppService;
         }
 
         
@@ -53,6 +56,18 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             
             var users = await _userRepo.GetAll().ToListAsync();
             return Ok(users);
+        }
+        
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> PostSlugs()
+        {
+            var token = GetToken();
+            var userType = LoginHelper.GetClaim(token, "UserRole");
+            if (userType != "Admin") return Unauthorized();
+            
+            var slugs = await _postAppService.GetAllPostsSlug();
+            return Ok(slugs);
         }
         
         

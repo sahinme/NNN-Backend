@@ -24,32 +24,32 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             _hubContext = hubContext;
         }
         
-        [Authorize]
-        [HttpPost("{id}/toggleLike")]
-        public async Task<ActionResult> ToggleLike(Guid id)
-        {
-            var userId = HttpContext.User.Identity.Name;
-
-            var story = await _postAppService.GetPostById(id,null);
-            //if (userId == story.OwnerId) return BadRequest("You can't like your own story");
-
-            var user = await _userAppService.GetByUsername(userId);
-            //var existingLike = story.Likes.Find(l => l.UserId == userId);
-            var payload = new LikeRelatedPayload
-            {
-                Username = user.Username,
-                StoryTitle = user.Username+ " "+ story.Id + " id li postu begendi"
-            };
-            
-           await _hubContext.Clients.User(story.UserInfo.UserName).SendAsync(
-                "notification",
-                new Notification<LikeRelatedPayload>
-                {
-                    NotificationType = Notifications.NotificationType.LIKE,
-                    Payload = payload
-                }
-            );
-            
+//        [Authorize]
+//        [HttpPost("{id}/toggleLike")]
+//        public async Task<ActionResult> ToggleLike(Guid id)
+//        {
+//            var userId = HttpContext.User.Identity.Name;
+//
+//            var story = await _postAppService.GetPostById(id,null);
+//            //if (userId == story.OwnerId) return BadRequest("You can't like your own story");
+//
+//            var user = await _userAppService.GetByUsername(userId);
+//            //var existingLike = story.Likes.Find(l => l.UserId == userId);
+//            var payload = new LikeRelatedPayload
+//            {
+//                Username = user.Username,
+//                StoryTitle = user.Username+ " "+ story.Id + " id li postu begendi"
+//            };
+//            
+//           await _hubContext.Clients.User(story.UserInfo.UserName).SendAsync(
+//                "notification",
+//                new Notification<LikeRelatedPayload>
+//                {
+//                    NotificationType = Notifications.NotificationType.LIKE,
+//                    Payload = payload
+//                }
+//            );
+//            
 //            if (story != null)
 //            {
 //                hubContext.Clients.User(story.OwnerId).SendAsync(
@@ -79,7 +79,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
 //                likeRepository.Delete(existingLike);
 //            }
 //            likeRepository.Commit();
-            return NoContent();
-        }
+            //return NoContent();
+        //}
     }
 }

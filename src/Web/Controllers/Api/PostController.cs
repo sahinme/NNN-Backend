@@ -46,7 +46,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(Guid status)
+        public async Task<IActionResult> Get(string slug)
         {
             var token = GetToken();
             string userId = null;
@@ -54,7 +54,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             {  userId = LoginHelper.GetClaim(token, "UserId");
             }
             
-            var post = await _postAppService.GetPostById(status, userId == null ? Guid.Empty : Guid.Parse(userId));
+            var post = await _postAppService.GetPostById(slug, userId == null ? Guid.Empty : Guid.Parse(userId));
             return Ok(post);
         }
         
