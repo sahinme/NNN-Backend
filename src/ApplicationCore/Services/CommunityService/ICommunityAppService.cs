@@ -9,7 +9,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
 {
     public interface ICommunityAppService
     {
-        Task<Community> CreateCommunity(CreateCommunity input);
+        Task<Response> CreateCommunity(CreateCommunity input);
         Task<List<GetAllCommunityDto>> GetAll();
         Task<Community> Update(UpdateCommunity input);
         Task<CommunityDto> GetById(string slug,Guid? userId);

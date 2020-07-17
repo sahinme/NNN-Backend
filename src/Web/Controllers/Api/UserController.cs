@@ -89,6 +89,15 @@ namespace Microsoft.Nnn.Web.Controllers.Api
            
         }
         
+        
+        [HttpPost]
+        public async Task<IActionResult> SendMail(string email,string subject,string message)
+        {
+            await _emailSender.SendEmail(email, subject, message);
+            return Ok();
+
+        }
+        
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> JoinCommunity(string slug)

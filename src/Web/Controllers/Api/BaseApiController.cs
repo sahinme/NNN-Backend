@@ -10,7 +10,7 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         protected string GetToken()
         {
             string value = Request.Headers[HeaderNames.Authorization];
-            if (value == "Bearer null"  || value == null )
+            if (value == "Bearer null" || value=="Bearer undefined"  || value == null )
             {
                 return "";
             }

@@ -39,14 +39,17 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             _categoryRepository = categoryRepository;
         }
         
-        public async Task<Community> CreateCommunity(CreateCommunity input)
+        public async Task<Response> CreateCommunity(CreateCommunity input)
         {
+            var responseModel = new Response();
             var slug = input.Name.GenerateSlug();
 
             var isExist =  _communityRepository.GetAll().Any(x => x.Slug == slug);
             if (isExist)
             {
-                throw new Exception("Böyle bir isimde topluluk var");
+                responseModel.Status = false;
+                responseModel.Message = "Bu isimde bir topluluk zaten var";
+                return responseModel;
             }
 
             var category = await _categoryRepository.GetAll().FirstOrDefaultAsync(x => x.Slug == input.CatSlug);
@@ -67,8 +70,18 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                 var path = await _blobService.InsertFile(input.CoverImage);
                 model.CoverImagePath = path;
             }
-            await _communityRepository.AddAsync(model);
-            return model;
+            var result = await _communityRepository.AddAsync(model);
+            var communityUser = new CommunityUser
+            {
+                CommunityId = result.Id,
+                UserId = input.UserId,
+                IsAdmin = true
+            };
+            await _communityUserRepository.AddAsync(communityUser);
+            responseModel.Message = "Topluluk başarıyla oluşturuldu";
+            responseModel.Status = true;
+            responseModel.Slug = model.Slug;
+            return responseModel;
         }
 
         public async Task<List<GetAllCommunityDto>> GetAll()
@@ -184,7 +197,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     Content = x.Content,
                     PageNumber = input.PageNumber,
                     LinkUrl = x.LinkUrl,
-                    MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
+                    MediaContentPath = x.MediaContentPath == null ? null : BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     ContentType = x.ContentType,
                     CreatedDateTime = x.CreatedDate,
                     UserPostVote = x.Votes.FirstOrDefault(p=>p.IsDeleted==false &&
@@ -199,7 +212,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                         ProfileImagePath = BlobService.BlobService.GetImageUrl(x.User.ProfileImagePath),
                         UserName = x.User.Username
                     },
-                }).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).OrderByDescending(x=>x.Id).ToListAsync();
+                }).OrderByDescending(x=>x.CreatedDateTime).Skip((input.PageNumber - 1) * input.PageSize).Take(input.PageSize).ToListAsync();
             var hasNext = await _postRepository.GetAll().Where(x => x.IsDeleted==false && x.Community.Slug == input.Slug)
                 .Skip((input.PageNumber) * input.PageSize).AnyAsync();
             var bb = new PagedResultDto<CommunityPostDto> {Results = posts ,  HasNext = hasNext};

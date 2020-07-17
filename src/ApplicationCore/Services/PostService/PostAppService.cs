@@ -103,7 +103,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                     LinkUrl = x.LinkUrl,
                     ContentType = x.ContentType,
                     UserPostVote = x.Votes.FirstOrDefault(u=>u.IsDeleted==false && u.UserId==userId && u.PostId==x.Id ),
-                    ContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
+                    ContentPath = x.MediaContentPath == null ? null : BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                     CreatedDateTime = x.CreatedDate,
                     Community = new PostCommunityDto
                     {
@@ -277,7 +277,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             if (voteCount == 1 || voteCount == 3 || voteCount==10 || voteCount == 50 || voteCount == 100)
             {
                 var subject = "Sallaman oylanıyor.";
-                var url = "https://saalla.com/p/" + community.Name + "/" + post.Id;
+                var url = "https://saalla.com/" + community.Slug + "/" + post.Slug;
                 await _emailSender.SendEmail(post.User.EmailAddress, subject, "Sallamanı " + voteCount + " kişi oyladı :"+url);
             }
             return model;
@@ -354,7 +354,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         PageNumber = input.PageNumber,
                         VoteCount = p.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - p.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
                         UserPostVote = p.Votes.FirstOrDefault(l=>l.UserId== input.EntityId && l.IsDeleted==false && l.PostId==p.Id ),
-                        MediaContentPath = BlobService.BlobService.GetImageUrl(p.MediaContentPath),
+                        MediaContentPath = p.MediaContentPath == null ? null : BlobService.BlobService.GetImageUrl(p.MediaContentPath),
                         CreatedDateTime = p.CreatedDate,
                         Community = new PostCommunityDto
                         {
@@ -440,7 +440,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         LinkUrl = x.LinkUrl,
                         UserPostVote = x.Votes.FirstOrDefault(l=>l.UserId== input.EntityId && l.IsDeleted==false && l.PostId==x.Id ),
                         VoteCount = x.Votes.Count(v=>v.IsDeleted==false && v.Value==1) - x.Votes.Count(v=>v.IsDeleted==false && v.Value==-1),
-                        MediaContentPath = BlobService.BlobService.GetImageUrl(x.MediaContentPath),
+                        MediaContentPath = x.MediaContentPath == null ? null : BlobService.BlobService.GetImageUrl(x.MediaContentPath),
                         ContentType = x.ContentType,
                         CreatedDateTime = x.CreatedDate,
                         PageNumber = input.PageNumber,

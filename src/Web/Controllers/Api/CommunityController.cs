@@ -20,12 +20,11 @@ namespace Microsoft.Nnn.Web.Controllers.Api
         
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateCommunity([FromForm] CreateCommunity input)
+        public async Task<IActionResult> CreateCommunity(CreateCommunity input)
         {
             var token = GetToken();
-            var userType = LoginHelper.GetClaim(token, "UserRole");
-            if (userType != "Admin") return Unauthorized();
-            
+            var userId = LoginHelper.GetClaim(token, "UserId");
+            input.UserId = Guid.Parse(userId);
             var result = await _communityAppService.CreateCommunity(input);
             return Ok(result);
         }

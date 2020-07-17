@@ -68,7 +68,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
             // email send
             var commentCount =  post.Comments.Count(c=>!c.IsDeleted);
             if (commentCount != 0 && commentCount != 20 && commentCount != 50 && commentCount != 100) return comment;
-            var url = "https://saalla.com/p/" + community.Name + "/" + post.Id;
+            var url = "https://saalla.com/" + community.Slug + "/" + post.Slug;
             var message = commentCount + " kişi gönderine salladı :"+url;
             var subject = "Gönderine sallıyorlar";
             await _emailSender.SendEmail(post.User.EmailAddress, subject, message);

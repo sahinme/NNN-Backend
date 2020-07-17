@@ -20,9 +20,9 @@ namespace Microsoft.Nnn.ApplicationCore.Services.BlobService
         }
         public async Task<string> InsertFile(IFormFile asset)
         {
-            string containerUrl = "nnncontainer";
+            string containerUrl = "saallacontainer";
             string url =
-                "DefaultEndpointsProtocol=https;AccountName=edutrostorageaccount;AccountKey=i+39A6nr6OdF54X7z2CIlZvn9aN8j2Bi6Eo7g9HPH1zYj1wdgYKNC1n/QUPNke+ucnomaxsxd7pSFkN0JgdoXw==;EndpointSuffix=core.windows.net";
+                "DefaultEndpointsProtocol=https;AccountName=saallaaccount;AccountKey=UQ2MqW7o5U0b+JDIblqxC8X9dphmnrVbVFONn+XjnqJkKSUcY8htXmeJvrpRsHIyv8KBNdH7EGMHiSNsOn4ypw==;EndpointSuffix=core.windows.net";
             try
             {
                 var imageName = GetImageName();
@@ -51,7 +51,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.BlobService
 
         public static string GetImageUrl(string path)
         {
-            return "https://edutrostorageaccount.blob.core.windows.net/nnncontainer/" + path;
+            return "https://saallaaccount.blob.core.windows.net/saallacontainer/" + path;
         }
     }
 }
