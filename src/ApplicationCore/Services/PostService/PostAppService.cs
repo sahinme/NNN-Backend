@@ -57,13 +57,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         public async Task<Post> CreatePost(CreatePostDto input)
         {
             var com = await _communityRepository.GetAll().FirstOrDefaultAsync(x => x.Slug == input.CommunitySlug);
-            var slug = input.Content.GenerateSlug();
+            var noHtml = Slug.HtmlToPlainText(input.Content); 
+            var slug =   Slug.FriendlyUrlTitle(noHtml);
             var hasSlug = await _postRepository.GetAll()
                 .FirstOrDefaultAsync(x => x.IsDeleted == false && x.Slug == slug);
             if (hasSlug != null)
             {
                 var newContent = input.Content + "" + RandomString.GenerateString(3);
-                slug = newContent.GenerateSlug();
+                slug = Slug.FriendlyUrlTitle(newContent);
             }
             var post = new Post
             {
@@ -256,7 +257,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
             await _postVoteRepository.AddAsync(model);
             // notificaiton
             var user = await _userRepository.GetByIdAsync(input.UserId);
-            var post = await _postRepository.GetAll().Where(x => x.IsDeleted == false && x.Id == input.PostId)
+            var post = await _postRepository.GetAll().Include(x=>x.User)
+                .Where(x => x.IsDeleted == false && x.Id == input.PostId)
                 .Include(x => x.Votes).FirstOrDefaultAsync();
             var community = await _communityRepository.GetByIdAsync(post.CommunityId);
             if (post.UserId != user.Id)
@@ -273,19 +275,25 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                 await _notificationRepository.AddAsync(notify);
             }
             //email send
-            var voteCount = post.Votes.Count(x => x.IsDeleted == false);
-            if (voteCount == 1 || voteCount == 3 || voteCount==10 || voteCount == 50 || voteCount == 100)
-            {
-                var subject = "Sallaman oylanıyor.";
-                var url = "https://saalla.com/" + community.Slug + "/" + post.Slug;
-                await _emailSender.SendEmail(post.User.EmailAddress, subject, "Sallamanı " + voteCount + " kişi oyladı :"+url);
-            }
+            //var voteCount = post.Votes.Count(x => x.IsDeleted == false);
+            var subject = "Sallaman oylanıyor.";
+            var url = "https://saalla.com/" + community.Slug + "/" + post.Slug;
+            await _emailSender.SendEmail(post.User.EmailAddress, subject, user.Username + " kişisi Sallamana oy verdi :"+url);
+//            if (voteCount == 1 || voteCount == 3 || voteCount==10 || voteCount == 50 || voteCount == 100)
+//            {
+//                
+//            }
             return model;
         }
 
-        public async Task<List<string>> GetAllPostsSlug()
+        public async Task<List<PostSlugs>> GetAllPostsSlug()
         {
-            var slugs = await _postRepository.GetAll().Where(x => x.IsDeleted == false).Select(x => x.Slug).ToListAsync();
+            var slugs = await _postRepository.GetAll().Where(x => x.IsDeleted == false).Include(x => x.Community)
+                .Select(x => new PostSlugs
+                {
+                    CSlug = x.Community.Slug,
+                    PSlug = x.Slug
+                }).ToListAsync();
             return slugs;
         }
 
@@ -360,7 +368,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         {
                             Slug = x.Community.Slug,
                             Name = x.Community.Name,
-                            LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
+                            LogoPath = x.Community.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                         },
                         User = new PostUserDto
                         {    
@@ -452,7 +460,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
                         {
                            Slug = x.Community.Slug,
                             Name = x.Community.Name,
-                            LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
+                            LogoPath = x.Community.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.Community.LogoPath)
                         },
                         User = new PostUserDto
                         {

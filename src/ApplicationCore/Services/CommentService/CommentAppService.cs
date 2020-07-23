@@ -50,7 +50,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
 
            // notify
            var user = await _userRepository.GetByIdAsync(input.UserId);
-           var post = await _postRepository.GetAll().Where(x => x.IsDeleted == false && x.Id == input.PostId)
+           var post = await _postRepository.GetAll().Include(x=>x.User)
+               .Where(x => x.IsDeleted == false && x.Id == input.PostId)
                .Include(x => x.Comments).FirstOrDefaultAsync();
            var community = await _communityRepository.GetByIdAsync(post.CommunityId);
 
@@ -66,10 +67,10 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommentService
            };
            await _notificationRepository.AddAsync(notify);
             // email send
-            var commentCount =  post.Comments.Count(c=>!c.IsDeleted);
-            if (commentCount != 0 && commentCount != 20 && commentCount != 50 && commentCount != 100) return comment;
+            //var commentCount =  post.Comments.Count(c=>!c.IsDeleted);
+            //if (commentCount != 0 && commentCount != 20 && commentCount != 50 && commentCount != 100) return comment;
             var url = "https://saalla.com/" + community.Slug + "/" + post.Slug;
-            var message = commentCount + " kişi gönderine salladı :"+url;
+            var message = user.Username + " kişisi gönderine salladı :"+url;
             var subject = "Gönderine sallıyorlar";
             await _emailSender.SendEmail(post.User.EmailAddress, subject, message);
             return comment;

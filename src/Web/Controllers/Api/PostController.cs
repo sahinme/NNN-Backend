@@ -127,7 +127,14 @@ namespace Microsoft.Nnn.Web.Controllers.Api
             await _postAppService.Delete(id);
             return Ok();
         }
-        
+
+        [HttpGet]
+        public async Task<IActionResult> GetSlugs()
+        {
+            var result = await _postAppService.GetAllPostsSlug();
+            return Ok(result);
+        }
+
         [Authorize]
         [HttpDelete]
         public async Task<IActionResult> ModeratorDelete(ModeratorDeleteDto input)

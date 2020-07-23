@@ -15,6 +15,8 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers
         [DefaultValue(false)]
         public bool Suspended { get; set; }
         
+        public ModeratorRequest ModeratorRequest { get; set; }
+        
         public User User { get; set; }
         public Community Community { get; set; }
     }

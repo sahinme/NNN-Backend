@@ -18,5 +18,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
         Task<List<GetAllCommunityDto>> OfModerators(Guid userId);
         Task<List<CommunityUserDto>> Users(string slug);
         Task<List<SearchDto>> Search(string text);
+        Task<Response> AddModerator(AddModeratorDto input);
     }
 }

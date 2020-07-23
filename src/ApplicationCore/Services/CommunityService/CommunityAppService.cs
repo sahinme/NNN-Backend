@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Nnn.ApplicationCore.Entities.Categories;
 using Microsoft.Nnn.ApplicationCore.Entities.Communities;
 using Microsoft.Nnn.ApplicationCore.Entities.CommunityUsers;
+using Microsoft.Nnn.ApplicationCore.Entities.Notifications;
 using Microsoft.Nnn.ApplicationCore.Entities.Posts;
 using Microsoft.Nnn.ApplicationCore.Entities.Users;
 using Microsoft.Nnn.ApplicationCore.Interfaces;
@@ -24,11 +25,14 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
         private readonly IAsyncRepository<CommunityUser> _communityUserRepository;
         private readonly IAsyncRepository<Category> _categoryRepository;
         private readonly IAsyncRepository<Post> _postRepository;
+        private readonly IAsyncRepository<Notification> _notificationRepository;
+        private readonly IEmailSender _emailSender;
         private readonly IAsyncRepository<User> _userRepository;
         private readonly IBlobService _blobService;
 
         public CommunityAppService(IAsyncRepository<Community> communityRepository,IBlobService blobService,
             IAsyncRepository<Post> postRepository,IAsyncRepository<CommunityUser> communityUserRepository,
+            IAsyncRepository<Notification> notificationRepository, IEmailSender emailSender,
             IAsyncRepository<User> userRepository,IAsyncRepository<Category> categoryRepository)
         {
             _communityRepository = communityRepository;
@@ -36,7 +40,9 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
             _postRepository = postRepository;
             _userRepository = userRepository;
             _communityUserRepository = communityUserRepository;
+            _notificationRepository = notificationRepository;
             _categoryRepository = categoryRepository;
+            _emailSender = emailSender;
         }
         
         public async Task<Response> CreateCommunity(CreateCommunity input)
@@ -93,7 +99,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     Name = x.Name,
                     Description = x.Description,
                     MemberCount = x.Users.Count(m=> !m.IsDeleted),
-                    LogoPath = BlobService.BlobService.GetImageUrl(x.LogoPath)
+                    LogoPath = x.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.LogoPath)
                 }).ToListAsync();
             return result;
         }
@@ -136,7 +142,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                 {
                     Slug = x.Community.Slug,
                     Description = x.Community.Description,
-                    LogoPath = BlobService.BlobService.GetImageUrl(x.Community.LogoPath),
+                    LogoPath = x.Community.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.Community.LogoPath),
                     MemberCount = x.Community.Users.Count(m => m.IsDeleted == false),
                     Name = x.Community.Name
                 }).ToListAsync();
@@ -153,7 +159,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     {
                         PostCount = m.User.Posts.Count(p=>p.IsDeleted==false),
                         Username = m.User.Username,
-                        ProfileImg = BlobService.BlobService.GetImageUrl(m.User.ProfileImagePath)
+                        ProfileImg = m.User.ProfileImagePath == null ? null : BlobService.BlobService.GetImageUrl(m.User.ProfileImagePath)
                     }).ToList()
                 }).FirstOrDefaultAsync();
             var users = result.Members;
@@ -169,8 +175,8 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     Slug = x.Slug,
                     Name = x.Name,
                     Description = x.Description,
-                    LogoPath = BlobService.BlobService.GetImageUrl(x.LogoPath),
-                    CoverImagePath = BlobService.BlobService.GetImageUrl(x.CoverImagePath),
+                    LogoPath = x.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.LogoPath),
+                    CoverImagePath = x.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.CoverImagePath),
                     CreatedDate = x.CreatedDate,
                     Moderators = x.Users.Where(q=>q.IsDeleted==false && q.Suspended==false && q.IsAdmin ).Select(q=>new CommunityUserDto
                     {
@@ -243,7 +249,7 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                 .Select(x => new SearchDto
                 {
                     Name = x.Slug,
-                    LogoPath = BlobService.BlobService.GetImageUrl(x.LogoPath),
+                    LogoPath = x.LogoPath == null ? null : BlobService.BlobService.GetImageUrl(x.LogoPath),
                     MemberCount = x.Users.Count(c => !c.IsDeleted),
                     Type = "community"
                 }).ToListAsync();
@@ -252,13 +258,92 @@ namespace Microsoft.Nnn.ApplicationCore.Services.CommunityService
                     x.IsDeleted == false && x.Username.Contains(text) || x.EmailAddress.Contains(text))
                 .Select(x => new SearchDto
                 {
-                    LogoPath = BlobService.BlobService.GetImageUrl(x.ProfileImagePath),
+                    LogoPath = x.ProfileImagePath == null ? null : BlobService.BlobService.GetImageUrl(x.ProfileImagePath),
                     Name = x.Username,
                     Type = "user"
                 }).ToListAsync();
 
             var result = coms.Union(users).ToList();
             return result;
+        }
+
+        public async Task<Response> AddModerator(AddModeratorDto input)
+        {
+            var response = new Response();
+            var community = await _communityRepository.GetAll()
+                .FirstOrDefaultAsync(x => !x.IsDeleted && x.Slug == input.CommunitySlug);
+            var requester = await _userRepository.GetByIdAsync(input.RequesterModeratorId);
+            var user = await _userRepository.GetByIdAsync(input.UserId);
+            
+            var isAlreadyExist = await _communityUserRepository.GetAll()
+                .Where(x => x.UserId == input.UserId && x.Community.Slug == input.CommunitySlug &&
+                            x.IsDeleted == false && x.IsAdmin).FirstOrDefaultAsync();
+            if (isAlreadyExist != null)
+            {
+                response.Message = "Bu kullanıcı zaten moderatör";
+                response.Status = false;
+                return response;
+            }
+
+            var isWaiting = await  _communityUserRepository.GetAll()
+                .Where(x => x.UserId == input.UserId && x.Community.Slug == input.CommunitySlug &&
+                            !x.IsDeleted && x.ModeratorRequest == ModeratorRequest.Waiting && !x.IsAdmin).FirstOrDefaultAsync();
+            if (isWaiting != null)
+            {
+                response.Message = "Bu kullanıcıya zaten istek gönderilmiş";
+                response.Status = false;
+                return response;
+            }
+
+            var isJoined = await _communityUserRepository.GetAll()
+                    .Where(x => x.UserId == input.UserId && x.Community.Slug == input.CommunitySlug && !x.IsDeleted)
+                    .FirstOrDefaultAsync();
+                if (isJoined != null)
+                {
+                    isJoined.ModeratorRequest = ModeratorRequest.Waiting;
+                    await _communityUserRepository.UpdateAsync(isJoined);
+
+                    response.Message = "Kullanıcıya istek gönderildi.";
+                    response.Status = true;
+                    var content = requester.Username + " seni" + community.Name +
+                                  " topluluğuna moderatör olarak eklemek istiyor.";
+                    var notify = new Notification
+                    {
+                        TargetId = community.Id,
+                        OwnerUserId = input.UserId,
+                        TargetName = "/t/"+community.Slug,
+                        Type = NotifyContentType.AddModerator,
+                        Content = content,
+                        ImgPath = community.LogoPath
+                    };
+                    await _notificationRepository.AddAsync(notify);
+                    await _emailSender.SendEmail(user.EmailAddress, "Moderatörlük isteği", content+ " https://saalla.com");
+                    return response;
+                }
+
+                var newRelation = new CommunityUser
+                {
+                    UserId = input.UserId,
+                    CommunityId = community.Id,
+                    ModeratorRequest = ModeratorRequest.Waiting
+                };
+                await _communityUserRepository.AddAsync(newRelation);
+                response.Message = "Kullanıcıya istek gönderildi.";
+                response.Status = true;
+                var content2 = requester.Username + " seni" + community.Name +
+                               " topluluğuna moderatör olarak eklemek istiyor.";
+                var notify2 = new Notification
+                {
+                    TargetId = community.Id,
+                    OwnerUserId = input.UserId,
+                    TargetName = "/t/"+community.Slug,
+                    Type = NotifyContentType.AddModerator,
+                    Content = requester.Username + " seni" + community.Name + " topluluğuna moderatör olarak eklemek istiyor.",
+                    ImgPath = community.LogoPath
+                };
+                await _notificationRepository.AddAsync(notify2);
+                await _emailSender.SendEmail(user.EmailAddress, "Moderatörlük isteği", content2+ " https://saalla.com");
+                return response;
         }
     }
 }

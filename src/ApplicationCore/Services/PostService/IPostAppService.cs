@@ -21,6 +21,6 @@ namespace Microsoft.Nnn.ApplicationCore.Services.PostService
         Task<PagedResultDto<GetAllPostDto>> PagedUnauthorizedHomePosts(PaginationParams input);
         Task<List<GetAllPostDto>> UnauthorizedHomePosts();
         Task<PostVote> Vote(CreateVoteDto input);
-        Task<List<string>> GetAllPostsSlug();
+        Task<List<PostSlugs>> GetAllPostsSlug();
     }
 }

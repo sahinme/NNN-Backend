@@ -8,6 +8,7 @@ namespace Microsoft.Nnn.ApplicationCore.Entities.Notifications
         PostVote=40,
         CommentLike=50,
         ReplyLike=60,
-        Message=70
+        Message=70,
+        AddModerator=80
     }
 }

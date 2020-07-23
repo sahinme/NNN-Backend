@@ -226,13 +226,22 @@ namespace Microsoft.Nnn.ApplicationCore.Services.UserService
                 throw new Exception("bu islem zaten yapilmis");
             }
 
+            var joinedUser = await _userRepository.GetByIdAsync(userId);
             var community = await _communityRepository.GetAll().FirstOrDefaultAsync(x => x.Slug == slug);
+            var moderators = _communityUserRepository.GetAll().Include(x => x.User)
+                .Where(x => x.CommunityId == community.Id && x.IsAdmin && x.IsDeleted==false);
+            
             var model = new CommunityUser
             {
                 UserId = userId,
                 CommunityId = community.Id
             };
             await _communityUserRepository.AddAsync(model);
+            foreach (var user in moderators)
+            {
+                await _emailSender.SendEmail(user.User.EmailAddress, "Kullanıcılar topluluğunu keşfediyor",
+                    joinedUser.Username + " topluluğuna katıldı: https://saalla.com/t/"+community.Slug);
+            }
             return model;
         }
         
